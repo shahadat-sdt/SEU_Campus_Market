@@ -22,10 +22,10 @@ function makeCode(title: string) {
   return `${prefix}-${crypto.randomInt(1000, 9999)}`;
 }
 
-function isHttpUrl(input: string) {
+function isHttpsUrl(input: string) {
   try {
     const url = new URL(input);
-    return url.protocol === "https:" || url.protocol === "http:";
+    return url.protocol === "https:";
   } catch {
     return false;
   }
@@ -102,7 +102,7 @@ export async function createListing(formData: FormData) {
   const imageUrl = value(formData, "imageUrl");
   const price = Number(value(formData, "price"));
 
-  if (!title || !description || !categories.includes(category as never) || !isHttpUrl(imageUrl) || !Number.isFinite(price) || price <= 0) {
+  if (!title || !description || !categories.includes(category as never) || !isHttpsUrl(imageUrl) || !Number.isFinite(price) || price <= 0) {
     redirect("/listings/new?error=missing");
   }
 
@@ -149,7 +149,7 @@ export async function updateListing(formData: FormData) {
   const listing = await db.listing.findUnique({ where: { id: listingId } });
   if (!listing || listing.sellerId !== user.id) redirect("/dashboard");
 
-  if (!title || !description || !categories.includes(category as never) || !isHttpUrl(imageUrl) || !Number.isFinite(price) || price <= 0) {
+  if (!title || !description || !categories.includes(category as never) || !isHttpsUrl(imageUrl) || !Number.isFinite(price) || price <= 0) {
     redirect(`/listings/${listingId}/edit?error=missing`);
   }
 

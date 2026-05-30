@@ -26,7 +26,7 @@ export default async function NewListingPage({ searchParams }: { searchParams: S
         <CardContent>
           {error && (
             <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-              Please fill every required field and add at least one real photo URL.
+              Please fill every required field and add a real HTTPS photo URL.
             </p>
           )}
           <form action={createListing} className="grid gap-4">
@@ -43,7 +43,7 @@ export default async function NewListingPage({ searchParams }: { searchParams: S
             <Input
               name="imageUrl"
               type="url"
-              placeholder="Photo URL, e.g. https://images.unsplash.com/..."
+              placeholder="HTTPS photo URL, e.g. https://images.unsplash.com/..."
               required
             />
             <Textarea

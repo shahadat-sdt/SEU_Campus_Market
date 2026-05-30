@@ -34,7 +34,9 @@ export default async function ProfilePage({ params }: { params: Params }) {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">{seller.name}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Verified SEU student seller · {seller.email}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Verified SEU student seller{isOwnProfile ? ` · ${seller.email}` : ""}
+            </p>
             {seller.bio && <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{seller.bio}</p>}
             {seller.preferredPickup && (
               <p className="mt-2 text-sm text-muted-foreground">Preferred pickup: {seller.preferredPickup}</p>

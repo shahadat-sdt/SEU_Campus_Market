@@ -40,7 +40,7 @@ export default async function EditListingPage({
         <CardContent>
           {error && (
             <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-              Please fill every required field and keep the price above zero.
+              Please fill every required field, use an HTTPS photo URL, and keep the price above zero.
             </p>
           )}
           <form action={updateListing} className="grid gap-4">
