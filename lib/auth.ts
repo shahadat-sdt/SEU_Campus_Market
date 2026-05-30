@@ -8,6 +8,9 @@ import { db } from "@/lib/db";
 const cookieName = "seu_market_session";
 
 function secret() {
+  if (!process.env.SESSION_SECRET && process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET is required in production.");
+  }
   return process.env.SESSION_SECRET || "dev-only-secret-change-me";
 }
 

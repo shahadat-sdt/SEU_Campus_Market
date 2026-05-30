@@ -9,6 +9,7 @@ export default async function VerifyPage({ searchParams }: { searchParams: Searc
   const params = await searchParams;
   const token = Array.isArray(params.token) ? params.token[0] : params.token;
   const registered = Boolean(params.registered);
+  const error = Array.isArray(params.error) ? params.error[0] : params.error;
 
   return (
     <main className="mx-auto grid min-h-[calc(100vh-66px)] max-w-md place-items-center px-4 py-10">
@@ -20,6 +21,11 @@ export default async function VerifyPage({ searchParams }: { searchParams: Searc
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error === "invalid" && (
+            <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              Verification token is invalid or already used.
+            </p>
+          )}
           {registered && token && (
             <p className="mb-4 rounded-md border bg-secondary p-3 text-sm">
               Demo verification token: <span className="font-mono">{token}</span>

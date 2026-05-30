@@ -84,8 +84,10 @@ export async function logout() {
 
 export async function verifyAccount(formData: FormData) {
   const token = value(formData, "token");
-  const user = await db.user.update({
-    where: { verificationToken: token },
+  const user = await db.user.findUnique({ where: { verificationToken: token } });
+  if (!user) redirect("/verify?error=invalid");
+  await db.user.update({
+    where: { id: user.id },
     data: { verified: true, verificationToken: null }
   });
   await setSession(user.id);
