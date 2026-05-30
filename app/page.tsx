@@ -58,7 +58,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-1 text-sm text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-primary" />
-              Verified Southeast University student marketplace
+              Southeast University student marketplace
             </div>
             <div className="space-y-3">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-normal md:text-6xl">

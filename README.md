@@ -5,7 +5,7 @@ It uses Next.js for frontend/backend, shadcn-style Tailwind components, Prisma, 
 
 ## Main Features
 
-- SEU email registration, demo verification token, login, and signed session cookie
+- SEU email registration, login, and signed session cookie
 - Product listings with category, price, image URL, unique product code, search, and filters
 - Seller profile with listings, ratings, and reviews
 - Order placement with safe campus meetup point, quantity, status tracking, and payment confirmation
@@ -25,23 +25,12 @@ It uses Next.js for frontend/backend, shadcn-style Tailwind components, Prisma, 
 ```bash
 npm install
 npm run db:push
-npm run db:seed
 ```
 
 5. Start the app:
 
 ```bash
 npm run dev
-```
-
-## Seed Accounts
-
-All seed users use password `password123`.
-
-```text
-Student seller: 2024000000001@seu.edu.bd
-Student buyer:  2024000000002@seu.edu.bd
-Admin:          2024000000999@seu.edu.bd
 ```
 
 ## Deploy On Vercel Free
@@ -73,7 +62,6 @@ npm run build
 
 ```bash
 npm run db:push
-npm run db:seed
 ```
 
 7. Deploy from Vercel. The app is ready when the deployment has the same `DATABASE_URL` and `SESSION_SECRET` values.

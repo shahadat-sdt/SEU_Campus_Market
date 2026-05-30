@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "SEU Campus Market",
-  description: "A verified student marketplace for Southeast University."
+  description: "A student marketplace for Southeast University."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

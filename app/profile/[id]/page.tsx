@@ -35,7 +35,7 @@ export default async function ProfilePage({ params }: { params: Params }) {
           <div>
             <h1 className="text-3xl font-semibold">{seller.name}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Verified SEU student seller{isOwnProfile ? ` · ${seller.email}` : ""}
+              SEU student seller{isOwnProfile ? ` · ${seller.email}` : ""}
             </p>
             {seller.bio && <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{seller.bio}</p>}
             {seller.preferredPickup && (

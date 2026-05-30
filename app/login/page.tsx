@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { login } from "@/lib/actions";
-import { Button } from "@/components/ui/button";
+import { AuthSubmitButton } from "@/components/auth-submit-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
@@ -26,7 +26,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           <form action={login} className="space-y-4">
             <Input name="email" type="email" placeholder="2024000000001@seu.edu.bd" required />
             <Input name="password" type="password" placeholder="Password" required />
-            <Button className="w-full">Login</Button>
+            <AuthSubmitButton idleLabel="Login" pendingLabel="Logging in..." />
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             New here? <Link href="/register" className="font-medium text-primary underline">Create account</Link>

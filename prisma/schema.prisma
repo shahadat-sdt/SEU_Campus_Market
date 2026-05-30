@@ -36,8 +36,6 @@ model User {
   name              String
   email             String             @unique
   passwordHash      String
-  verified          Boolean            @default(false)
-  verificationToken String?            @unique
   bio               String?
   phone             String?
   preferredPickup   String?

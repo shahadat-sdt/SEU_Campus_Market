@@ -49,7 +49,6 @@ export async function getCurrentUser() {
       id: true,
       name: true,
       email: true,
-      verified: true,
       role: true,
       bio: true,
       phone: true,
@@ -62,7 +61,6 @@ export async function getCurrentUser() {
 export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!user.verified) redirect("/verify");
   return user;
 }
 

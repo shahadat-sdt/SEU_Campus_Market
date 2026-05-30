@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { register } from "@/lib/actions";
-import { Button } from "@/components/ui/button";
+import { AuthSubmitButton } from "@/components/auth-submit-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
@@ -15,7 +15,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
       <Card className="w-full shadow-campus">
         <CardHeader>
           <CardTitle>Create student account</CardTitle>
-          <CardDescription>Use your 13-digit SEU student email for campus verification.</CardDescription>
+          <CardDescription>Use your 13-digit SEU student email to join the campus marketplace.</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -31,7 +31,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
             <Input name="name" placeholder="Full name" required />
             <Input name="email" type="email" placeholder="2024000000001@seu.edu.bd" required />
             <Input name="password" type="password" placeholder="Password" minLength={6} required />
-            <Button className="w-full">Register</Button>
+            <AuthSubmitButton idleLabel="Register" pendingLabel="Creating account..." />
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Already joined? <Link href="/login" className="font-medium text-primary underline">Login</Link>

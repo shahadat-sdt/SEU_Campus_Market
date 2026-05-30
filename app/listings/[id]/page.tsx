@@ -102,7 +102,7 @@ export default async function ListingPage({ params }: { params: Params }) {
         {!user ? (
           <Card>
             <CardContent className="space-y-3 pt-5">
-              <p className="text-sm text-muted-foreground">Login with your verified SEU account to place an order.</p>
+              <p className="text-sm text-muted-foreground">Login with your SEU account to place an order.</p>
               <Button asChild className="w-full"><Link href="/login">Login to order</Link></Button>
             </CardContent>
           </Card>

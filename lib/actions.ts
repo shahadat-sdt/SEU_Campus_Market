@@ -48,17 +48,19 @@ export async function register(formData: FormData) {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
-  const verificationToken = crypto.randomBytes(18).toString("hex");
+  let userId = "";
 
   try {
-    await db.user.create({
-      data: { name, email, passwordHash, verificationToken }
+    const user = await db.user.create({
+      data: { name, email, passwordHash }
     });
+    userId = user.id;
   } catch {
     redirect("/register?error=exists");
   }
 
-  redirect(`/verify?registered=1&token=${verificationToken}`);
+  await setSession(userId);
+  redirect("/");
 }
 
 export async function login(formData: FormData) {
@@ -69,9 +71,6 @@ export async function login(formData: FormData) {
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     redirect("/login?error=invalid");
   }
-  if (!user.verified) {
-    redirect(`/verify?email=${encodeURIComponent(email)}`);
-  }
 
   await setSession(user.id);
   redirect("/");
@@ -80,18 +79,6 @@ export async function login(formData: FormData) {
 export async function logout() {
   await clearSession();
   redirect("/login");
-}
-
-export async function verifyAccount(formData: FormData) {
-  const token = value(formData, "token");
-  const user = await db.user.findUnique({ where: { verificationToken: token } });
-  if (!user) redirect("/verify?error=invalid");
-  await db.user.update({
-    where: { id: user.id },
-    data: { verified: true, verificationToken: null }
-  });
-  await setSession(user.id);
-  redirect("/");
 }
 
 export async function createListing(formData: FormData) {
