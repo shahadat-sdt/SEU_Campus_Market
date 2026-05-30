@@ -283,3 +283,12 @@ export async function reportListing(formData: FormData) {
   await db.report.create({ data: { listingId, userId: user.id, reason } });
   revalidatePath(`/listings/${listingId}`);
 }
+
+export async function markNotificationsRead() {
+  const user = await requireUser();
+  await db.notification.updateMany({
+    where: { userId: user.id, read: false },
+    data: { read: true }
+  });
+  revalidatePath("/notifications");
+}
