@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Flag, ShieldCheck, Star, Tag } from "lucide-react";
-import { placeOrder, reportListing, updateListingStatus } from "@/lib/actions";
+import { deleteListing, placeOrder, reportListing, updateListingStatus } from "@/lib/actions";
 import { getCurrentUser, requireUser } from "@/lib/auth";
 import { listingStatuses, meetupPoints } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -128,6 +128,10 @@ export default async function ListingPage({ params }: { params: Params }) {
                     ))}
                   </Select>
                   <Button size="sm">Save</Button>
+                </form>
+                <form action={deleteListing}>
+                  <input type="hidden" name="listingId" value={listing.id} />
+                  <Button size="sm" variant="destructive">Delete</Button>
                 </form>
               </div>
             </CardContent>

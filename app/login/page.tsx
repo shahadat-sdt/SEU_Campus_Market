@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
             </p>
           )}
           <form action={login} className="space-y-4">
-            <Input name="email" type="email" placeholder="name@seu.edu.bd" required />
+            <Input name="email" type="email" placeholder="2024000000001@seu.edu.bd" required />
             <Input name="password" type="password" placeholder="Password" required />
             <Button className="w-full">Login</Button>
           </form>

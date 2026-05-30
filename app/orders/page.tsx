@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { CheckCircle2, CreditCard, PackageCheck } from "lucide-react";
-import { createReview, markPaymentReceived, updateOrder } from "@/lib/actions";
+import { CheckCircle2, CreditCard, PackageCheck, XCircle } from "lucide-react";
+import { addPaymentNote, cancelOrder, createReview, markPaymentReceived, updateOrder } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { orderStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -53,6 +53,28 @@ export default async function OrdersPage() {
                 <p className="text-muted-foreground">Seller: {order.seller.name}</p>
                 <p>{order.quantity} item(s), {money(order.agreedPrice.toString())}, pickup at {order.pickupPoint}</p>
                 <p className="text-muted-foreground">Payment: {order.paymentStatus} · {shortDate(order.createdAt)}</p>
+                {canRevealContact(order.status) && (
+                  <div className="rounded-md border bg-secondary/40 p-3">
+                    <p className="font-medium">Seller contact</p>
+                    <p className="text-muted-foreground">{order.seller.email}{order.seller.phone ? ` · ${order.seller.phone}` : ""}</p>
+                  </div>
+                )}
+                {order.statusNote && <p className="rounded-md bg-muted p-3 text-muted-foreground">Status note: {order.statusNote}</p>}
+                {order.paymentNote && <p className="rounded-md bg-muted p-3 text-muted-foreground">Payment note: {order.paymentNote}</p>}
+                {order.status !== "CANCELLED" && order.paymentStatus !== "RECEIVED" && (
+                  <form action={addPaymentNote} className="grid gap-2 rounded-md border p-3">
+                    <input type="hidden" name="orderId" value={order.id} />
+                    <Input name="paymentNote" placeholder="bKash/Nagad/Cash note or transaction reference" defaultValue={order.paymentNote || ""} required />
+                    <Button size="sm" variant="outline"><CreditCard className="h-4 w-4" /> Save payment note</Button>
+                  </form>
+                )}
+                {order.status === "PENDING" && (
+                  <form action={cancelOrder} className="grid gap-2 rounded-md border p-3">
+                    <input type="hidden" name="orderId" value={order.id} />
+                    <Input name="reason" placeholder="Cancellation reason" />
+                    <Button size="sm" variant="destructive"><XCircle className="h-4 w-4" /> Cancel request</Button>
+                  </form>
+                )}
                 {order.status === "COMPLETED" && !order.review && (
                   <form action={createReview} className="grid gap-2 rounded-md border p-3">
                     <input type="hidden" name="orderId" value={order.id} />
@@ -89,15 +111,27 @@ export default async function OrdersPage() {
                 <p className="text-muted-foreground">Buyer: {order.buyer.name}</p>
                 <p>{order.quantity} item(s), {money(order.agreedPrice.toString())}, pickup at {order.pickupPoint}</p>
                 <p className="text-muted-foreground">Payment: {order.paymentStatus} · {shortDate(order.createdAt)}</p>
+                {canRevealContact(order.status) && (
+                  <div className="rounded-md border bg-secondary/40 p-3">
+                    <p className="font-medium">Buyer contact</p>
+                    <p className="text-muted-foreground">{order.buyer.email}{order.buyer.phone ? ` · ${order.buyer.phone}` : ""}</p>
+                  </div>
+                )}
+                {order.note && <p className="rounded-md bg-muted p-3 text-muted-foreground">Buyer note: {order.note}</p>}
+                {order.paymentNote && <p className="rounded-md bg-muted p-3 text-muted-foreground">Payment note: {order.paymentNote}</p>}
+                {order.statusNote && <p className="rounded-md bg-muted p-3 text-muted-foreground">Status note: {order.statusNote}</p>}
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
-                  <form action={updateOrder} className="flex gap-2">
+                  <form action={updateOrder} className="grid gap-2">
                     <input type="hidden" name="orderId" value={order.id} />
-                    <Select name="status" defaultValue={order.status}>
-                      {orderStatuses.map((status) => (
-                        <option key={status} value={status}>{status}</option>
-                      ))}
-                    </Select>
-                    <Button size="sm"><PackageCheck className="h-4 w-4" /> Update</Button>
+                    <div className="flex gap-2">
+                      <Select name="status" defaultValue={order.status}>
+                        {orderStatuses.map((status) => (
+                          <option key={status} value={status}>{status}</option>
+                        ))}
+                      </Select>
+                      <Button size="sm"><PackageCheck className="h-4 w-4" /> Update</Button>
+                    </div>
+                    <Input name="statusNote" placeholder="Optional update or rejection reason" defaultValue={order.statusNote || ""} />
                   </form>
                   <form action={markPaymentReceived}>
                     <input type="hidden" name="orderId" value={order.id} />
@@ -114,6 +148,10 @@ export default async function OrdersPage() {
       </div>
     </main>
   );
+}
+
+function canRevealContact(status: string) {
+  return status === "CONFIRMED" || status === "READY" || status === "COMPLETED";
 }
 
 function EmptyState({ text }: { text: string }) {

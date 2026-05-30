@@ -2,15 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { money } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Params = Promise<{ id: string }>;
 
 export default async function ProfilePage({ params }: { params: Params }) {
   const { id } = await params;
+  const currentUser = await getCurrentUser();
   const seller = await db.user.findUnique({
     where: { id },
     include: {
@@ -23,6 +26,7 @@ export default async function ProfilePage({ params }: { params: Params }) {
   const rating = seller.reviewsReceived.length
     ? seller.reviewsReceived.reduce((sum, review) => sum + review.rating, 0) / seller.reviewsReceived.length
     : 0;
+  const isOwnProfile = currentUser?.id === seller.id;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
@@ -30,12 +34,23 @@ export default async function ProfilePage({ params }: { params: Params }) {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">{seller.name}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Verified SEU student seller</p>
+            <p className="mt-2 text-sm text-muted-foreground">Verified SEU student seller · {seller.email}</p>
+            {seller.bio && <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{seller.bio}</p>}
+            {seller.preferredPickup && (
+              <p className="mt-2 text-sm text-muted-foreground">Preferred pickup: {seller.preferredPickup}</p>
+            )}
           </div>
-          <div className="flex items-center gap-2 rounded-md bg-secondary px-3 py-2">
-            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-            <span className="font-semibold">{rating ? rating.toFixed(1) : "New"}</span>
-            <span className="text-sm text-muted-foreground">({seller.reviewsReceived.length} reviews)</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 rounded-md bg-secondary px-3 py-2">
+              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+              <span className="font-semibold">{rating ? rating.toFixed(1) : "New"}</span>
+              <span className="text-sm text-muted-foreground">({seller.reviewsReceived.length} reviews)</span>
+            </div>
+            {isOwnProfile && (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/profile/edit">Edit profile</Link>
+              </Button>
+            )}
           </div>
         </div>
       </section>

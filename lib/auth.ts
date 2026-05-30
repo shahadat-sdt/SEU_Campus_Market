@@ -47,6 +47,10 @@ export async function getCurrentUser() {
       name: true,
       email: true,
       verified: true,
+      role: true,
+      bio: true,
+      phone: true,
+      preferredPickup: true,
       createdAt: true
     }
   });
@@ -56,5 +60,11 @@ export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!user.verified) redirect("/verify");
+  return user;
+}
+
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (user.role !== "ADMIN") redirect("/");
   return user;
 }

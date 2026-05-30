@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -22,6 +23,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const user = await getCurrentUser();
   const q = first(params.q) || "";
   const category = first(params.category) || "";
+  const sort = first(params.sort) || "newest";
 
   const listings = await db.listing.findMany({
     where: {
@@ -42,7 +44,11 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         include: { reviewsReceived: true }
       }
     },
-    orderBy: { createdAt: "desc" }
+    orderBy: sort === "price-low"
+      ? { price: "asc" }
+      : sort === "price-high"
+        ? { price: "desc" }
+        : { createdAt: "desc" }
   });
 
   return (
@@ -62,11 +68,17 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                 A clean campus feed for food, notes, electronics, clothing, handmade items, and used goods.
               </p>
             </div>
-            <form className="grid gap-3 rounded-lg border bg-card p-3 shadow-campus sm:grid-cols-[1fr_auto]">
+            <form className="grid gap-3 rounded-lg border bg-card p-3 shadow-campus sm:grid-cols-[1fr_160px_auto]">
+              {category && <input type="hidden" name="category" value={category} />}
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input name="q" defaultValue={q} placeholder="Search title, description, or product code" className="pl-9" />
               </div>
+              <Select name="sort" defaultValue={sort}>
+                <option value="newest">Newest</option>
+                <option value="price-low">Price low</option>
+                <option value="price-high">Price high</option>
+              </Select>
               <Button type="submit">Search</Button>
             </form>
           </div>

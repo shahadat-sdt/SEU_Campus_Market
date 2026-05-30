@@ -15,13 +15,13 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
       <Card className="w-full shadow-campus">
         <CardHeader>
           <CardTitle>Create student account</CardTitle>
-          <CardDescription>Use an official SEU email address for campus verification.</CardDescription>
+          <CardDescription>Use your 13-digit SEU student email for campus verification.</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
             <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               {error === "email"
-                ? "Please use an SEU email address."
+                ? "Please use your 13-digit SEU email, for example 2024000000001@seu.edu.bd."
                 : error === "exists"
                   ? "An account already exists with this email."
                   : "Please complete every field. Password needs 6+ characters."}
@@ -29,7 +29,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           )}
           <form action={register} className="space-y-4">
             <Input name="name" placeholder="Full name" required />
-            <Input name="email" type="email" placeholder="name@seu.edu.bd" required />
+            <Input name="email" type="email" placeholder="2024000000001@seu.edu.bd" required />
             <Input name="password" type="password" placeholder="Password" minLength={6} required />
             <Button className="w-full">Register</Button>
           </form>

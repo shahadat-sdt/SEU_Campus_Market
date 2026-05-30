@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { updateListingStatus } from "@/lib/actions";
+import { deleteListing, updateListingStatus } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { listingStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -95,6 +95,10 @@ export default async function DashboardPage() {
                     ))}
                   </Select>
                   <Button size="sm">Save</Button>
+                </form>
+                <form action={deleteListing}>
+                  <input type="hidden" name="listingId" value={listing.id} />
+                  <Button size="sm" variant="destructive">Delete</Button>
                 </form>
               </div>
             </div>

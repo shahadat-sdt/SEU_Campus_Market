@@ -26,6 +26,11 @@ enum PaymentStatus {
   RECEIVED
 }
 
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
 model User {
   id                String             @id @default(cuid())
   name              String
@@ -34,6 +39,9 @@ model User {
   verified          Boolean            @default(false)
   verificationToken String?            @unique
   bio               String?
+  phone             String?
+  preferredPickup   String?
+  role              UserRole           @default(STUDENT)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   listings          Listing[]
@@ -72,6 +80,8 @@ model Order {
   agreedPrice   Decimal       @db.Decimal(10, 2)
   pickupPoint   String
   note          String?
+  statusNote    String?
+  paymentNote   String?
   status        OrderStatus   @default(PENDING)
   paymentStatus PaymentStatus @default(UNPAID)
   listingId     String
@@ -125,6 +135,7 @@ model Notification {
 model Report {
   id        String   @id @default(cuid())
   reason    String
+  resolved  Boolean  @default(false)
   listingId String?
   listing   Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
   userId    String

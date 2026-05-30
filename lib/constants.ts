@@ -33,9 +33,5 @@ export const listingStatuses = [
 
 export function isUniversityEmail(email: string) {
   const normalized = email.trim().toLowerCase();
-  return (
-    normalized.endsWith("@seu.edu.bd") ||
-    normalized.endsWith("@seu.ac.bd") ||
-    normalized.endsWith("@student.seu.edu.bd")
-  );
+  return /^\d{13}@seu\.edu\.bd$/.test(normalized);
 }

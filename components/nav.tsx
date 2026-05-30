@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, LayoutDashboard, LogOut, PackagePlus, ShoppingBag, UserRound } from "lucide-react";
+import { Bell, LayoutDashboard, LogOut, PackagePlus, ShieldCheck, ShoppingBag, UserRound } from "lucide-react";
 import { logout } from "@/lib/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -32,6 +32,11 @@ export async function Nav() {
               <Button asChild variant="ghost" size="sm">
                 <Link href="/dashboard"><LayoutDashboard className="h-4 w-4" /> <span className="hidden md:inline">Dashboard</span></Link>
               </Button>
+              {user.role === "ADMIN" && (
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/admin"><ShieldCheck className="h-4 w-4" /> <span className="hidden md:inline">Admin</span></Link>
+                </Button>
+              )}
               <Button asChild variant="ghost" size="icon">
                 <Link href="/notifications" aria-label="Notifications" className="relative">
                   <Bell className="h-4 w-4" />

@@ -14,32 +14,48 @@ async function main() {
 
   const passwordHash = await bcrypt.hash("password123", 12);
 
-  const [hiya, muzahid, sayma] = await Promise.all([
+  const [hiya, muzahid, sayma, admin] = await Promise.all([
     prisma.user.create({
       data: {
         name: "Hiya Rahman",
-        email: "hiya@seu.edu.bd",
+        email: "2024000000001@seu.edu.bd",
         passwordHash,
         verified: true,
-        bio: "Handmade churi and small gifts."
+        bio: "Handmade churi and small gifts.",
+        phone: "01700000001",
+        preferredPickup: "Library lobby"
       }
     }),
     prisma.user.create({
       data: {
         name: "Muzahid Islam",
-        email: "muzahid@seu.edu.bd",
+        email: "2024000000002@seu.edu.bd",
         passwordHash,
         verified: true,
-        bio: "Electronics buyer and campus deal hunter."
+        bio: "Electronics buyer and campus deal hunter.",
+        phone: "01700000002",
+        preferredPickup: "CSE department floor"
       }
     }),
     prisma.user.create({
       data: {
         name: "Sayma Islam",
-        email: "sayma@seu.edu.bd",
+        email: "2024000000003@seu.edu.bd",
         passwordHash,
         verified: true,
-        bio: "Used items, makeup, clothing, and general campus goods."
+        bio: "Used items, makeup, clothing, and general campus goods.",
+        phone: "01700000003",
+        preferredPickup: "Cafeteria"
+      }
+    }),
+    prisma.user.create({
+      data: {
+        name: "SEU Market Admin",
+        email: "2024000000999@seu.edu.bd",
+        passwordHash,
+        verified: true,
+        role: "ADMIN",
+        bio: "Demo admin account for report moderation."
       }
     })
   ]);
@@ -125,6 +141,22 @@ async function main() {
       { userId: hiya.id, category: "Notes" },
       { userId: sayma.id, category: "Electronics" }
     ]
+  });
+
+  await prisma.report.create({
+    data: {
+      listingId: churi.id,
+      userId: muzahid.id,
+      reason: "Demo report for admin review"
+    }
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: admin.id,
+      title: "Demo report created",
+      body: "Open the admin page to review reported listings."
+    }
   });
 }
 
