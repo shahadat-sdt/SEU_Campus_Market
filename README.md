@@ -48,23 +48,25 @@ Admin:          2024000000999@seu.edu.bd
 1. Push the `dev` branch to GitHub.
 2. In Vercel, import the repository and choose the branch you want to deploy.
 3. Create a free hosted PostgreSQL database with Neon, Supabase, or another provider.
+   Use the pooled connection string for Vercel if your provider offers one.
 4. Add these environment variables in Vercel Project Settings:
 
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB?schema=public"
 SESSION_SECRET="generate-a-long-random-secret"
-NEXT_PUBLIC_APP_URL="https://your-domain.example"
 ```
 
-5. Use the default Vercel install/build commands:
+5. Use the default Vercel install command and this build command:
 
 ```bash
 npm run build
 ```
 
-6. Push the Prisma schema to the hosted database from your local machine before first use:
+6. Push the Prisma schema to the hosted database from your local machine before first use. Temporarily set your local `.env` `DATABASE_URL` to the same hosted database URL, then run:
 
 ```bash
 npm run db:push
 npm run db:seed
 ```
+
+7. Deploy from Vercel. The app is ready when the deployment has the same `DATABASE_URL` and `SESSION_SECRET` values.
