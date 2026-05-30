@@ -18,12 +18,7 @@ It uses Next.js for frontend/backend, shadcn-style Tailwind components, Prisma, 
 ## Run Locally
 
 1. Copy `.env.example` to `.env`.
-2. Start PostgreSQL:
-
-```bash
-docker compose up -d
-```
-
+2. Create a PostgreSQL database locally or with a free hosted provider such as Neon or Supabase, then set `DATABASE_URL` in `.env`.
 3. Install and prepare the database:
 
 ```bash
@@ -48,9 +43,12 @@ Student buyer:  2024000000002@seu.edu.bd
 Admin:          2024000000999@seu.edu.bd
 ```
 
-## Deploy
+## Deploy On Vercel Free
 
-Set these environment variables in your host:
+1. Push the `dev` branch to GitHub.
+2. In Vercel, import the repository and choose the branch you want to deploy.
+3. Create a free hosted PostgreSQL database with Neon, Supabase, or another provider.
+4. Add these environment variables in Vercel Project Settings:
 
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB?schema=public"
@@ -58,19 +56,15 @@ SESSION_SECRET="generate-a-long-random-secret"
 NEXT_PUBLIC_APP_URL="https://your-domain.example"
 ```
 
-Prepare the database before the first production start:
+5. Use the default Vercel install/build commands:
 
 ```bash
-npm ci
-npm run db:push
 npm run build
-npm run start
 ```
 
-Docker is also supported:
+6. Push the Prisma schema to the hosted database from your local machine before first use:
 
 ```bash
-docker build -t seu-campus-market .
-docker run -p 3000:3000 --env-file .env seu-campus-market
+npm run db:push
+npm run db:seed
 ```
-
