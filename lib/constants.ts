@@ -25,6 +25,12 @@ export const orderStatuses = [
   "CANCELLED"
 ] as const;
 
+export const listingStatuses = [
+  "ACTIVE",
+  "SOLD",
+  "HIDDEN"
+] as const;
+
 export function isUniversityEmail(email: string) {
   const normalized = email.trim().toLowerCase();
   return (

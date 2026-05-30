@@ -2,11 +2,11 @@
 
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { OrderStatus } from "@prisma/client";
+import { ListingStatus, OrderStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearSession, requireUser, setSession } from "@/lib/auth";
-import { categories, isUniversityEmail, meetupPoints, orderStatuses } from "@/lib/constants";
+import { categories, isUniversityEmail, listingStatuses, meetupPoints, orderStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
 
 function value(formData: FormData, key: string) {
@@ -122,6 +122,51 @@ export async function createListing(formData: FormData) {
   redirect(`/listings/${listing.id}`);
 }
 
+export async function updateListing(formData: FormData) {
+  const user = await requireUser();
+  const listingId = value(formData, "listingId");
+  const title = value(formData, "title");
+  const description = value(formData, "description");
+  const category = value(formData, "category");
+  const imageUrl = value(formData, "imageUrl");
+  const price = Number(value(formData, "price"));
+
+  const listing = await db.listing.findUnique({ where: { id: listingId } });
+  if (!listing || listing.sellerId !== user.id) redirect("/dashboard");
+
+  if (!title || !description || !categories.includes(category as never) || !imageUrl || !Number.isFinite(price) || price <= 0) {
+    redirect(`/listings/${listingId}/edit?error=missing`);
+  }
+
+  await db.listing.update({
+    where: { id: listingId },
+    data: { title, description, category, imageUrl, price }
+  });
+
+  revalidatePath("/");
+  revalidatePath("/dashboard");
+  revalidatePath(`/listings/${listingId}`);
+  redirect(`/listings/${listingId}`);
+}
+
+export async function updateListingStatus(formData: FormData) {
+  const user = await requireUser();
+  const listingId = value(formData, "listingId");
+  const status = value(formData, "status") as ListingStatus;
+  const returnTo = value(formData, "returnTo");
+  if (!listingStatuses.includes(status as never)) redirect("/dashboard");
+
+  const listing = await db.listing.findUnique({ where: { id: listingId } });
+  if (!listing || listing.sellerId !== user.id) redirect("/dashboard");
+
+  await db.listing.update({ where: { id: listingId }, data: { status } });
+
+  revalidatePath("/");
+  revalidatePath("/dashboard");
+  revalidatePath(`/listings/${listingId}`);
+  redirect(returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/dashboard");
+}
+
 export async function followCategory(formData: FormData) {
   const user = await requireUser();
   const category = value(formData, "category");
@@ -146,7 +191,7 @@ export async function placeOrder(formData: FormData) {
   if (!meetupPoints.includes(pickupPoint as never)) redirect(`/listings/${listingId}`);
 
   const listing = await db.listing.findUnique({ where: { id: listingId } });
-  if (!listing || listing.sellerId === user.id) redirect(`/listings/${listingId}`);
+  if (!listing || listing.sellerId === user.id || listing.status !== "ACTIVE") redirect(`/listings/${listingId}`);
 
   const order = await db.order.create({
     data: {

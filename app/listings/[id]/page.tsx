@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Flag, ShieldCheck, Star, Tag } from "lucide-react";
-import { placeOrder, reportListing } from "@/lib/actions";
+import { placeOrder, reportListing, updateListingStatus } from "@/lib/actions";
 import { getCurrentUser, requireUser } from "@/lib/auth";
-import { meetupPoints } from "@/lib/constants";
+import { listingStatuses, meetupPoints } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { money, shortDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ export default async function ListingPage({ params }: { params: Params }) {
   const reviews = listing.seller.reviewsReceived;
   const rating = reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
   const isSeller = user?.id === listing.sellerId;
+  if (listing.status !== "ACTIVE" && !isSeller) notFound();
 
   return (
     <main className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1.2fr_0.8fr]">
@@ -46,7 +47,10 @@ export default async function ListingPage({ params }: { params: Params }) {
                 <CardTitle className="text-2xl">{listing.title}</CardTitle>
                 <p className="mt-2 text-sm text-muted-foreground">{listing.description}</p>
               </div>
-              <Badge variant="mint">{listing.category}</Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="mint">{listing.category}</Badge>
+                {listing.status !== "ACTIVE" && <Badge variant="warm">{listing.status}</Badge>}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-3">
@@ -104,8 +108,34 @@ export default async function ListingPage({ params }: { params: Params }) {
           </Card>
         ) : isSeller ? (
           <Card>
+            <CardHeader>
+              <CardTitle>Manage listing</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Orders for this item appear in your orders page and dashboard.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/listings/${listing.id}/edit`}>Edit details</Link>
+                </Button>
+                <form action={updateListingStatus} className="flex gap-2">
+                  <input type="hidden" name="listingId" value={listing.id} />
+                  <input type="hidden" name="returnTo" value={`/listings/${listing.id}`} />
+                  <Select name="status" defaultValue={listing.status} className="w-32">
+                    {listingStatuses.map((status) => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </Select>
+                  <Button size="sm">Save</Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        ) : listing.status !== "ACTIVE" ? (
+          <Card>
             <CardContent className="pt-5 text-sm text-muted-foreground">
-              This is your listing. Orders for it will appear in your orders page and dashboard.
+              This listing is no longer accepting new orders.
             </CardContent>
           </Card>
         ) : (
