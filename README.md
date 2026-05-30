@@ -18,8 +18,9 @@ It uses Next.js for frontend/backend, shadcn-style Tailwind components, Prisma, 
 ## Run Locally
 
 1. Copy `.env.example` to `.env`.
-2. Create a PostgreSQL database locally or with a free hosted provider such as Neon or Supabase, then set `DATABASE_URL` in `.env`.
-3. Install and prepare the database:
+2. Use Node.js 22 LTS.
+3. Create a PostgreSQL database locally or with a free hosted provider such as Neon or Supabase, then set `DATABASE_URL` in `.env`.
+4. Install and prepare the database:
 
 ```bash
 npm install
@@ -27,7 +28,7 @@ npm run db:push
 npm run db:seed
 ```
 
-4. Start the app:
+5. Start the app:
 
 ```bash
 npm run dev
@@ -54,6 +55,12 @@ Admin:          2024000000999@seu.edu.bd
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB?schema=public"
 SESSION_SECRET="generate-a-long-random-secret"
+```
+
+You can generate a session secret with:
+
+```bash
+openssl rand -base64 32
 ```
 
 5. Use the default Vercel install command and this build command:
