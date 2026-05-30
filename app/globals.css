@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 42 38% 97%;
+  --foreground: 188 31% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 188 31% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 188 31% 12%;
+  --primary: 174 58% 28%;
+  --primary-foreground: 44 65% 96%;
+  --secondary: 38 87% 88%;
+  --secondary-foreground: 31 45% 20%;
+  --muted: 176 18% 91%;
+  --muted-foreground: 188 13% 39%;
+  --accent: 350 83% 92%;
+  --accent-foreground: 352 58% 28%;
+  --destructive: 0 72% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 184 16% 84%;
+  --input: 184 16% 84%;
+  --ring: 174 58% 28%;
+  --radius: 0.5rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  min-height: 100vh;
+  background:
+    linear-gradient(135deg, rgba(247, 185, 83, 0.18), transparent 28rem),
+    linear-gradient(315deg, rgba(36, 142, 130, 0.12), transparent 32rem),
+    hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+a {
+  text-underline-offset: 4px;
+}
+
+.campus-grid {
+  background-image:
+    linear-gradient(rgba(15, 99, 91, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 99, 91, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}

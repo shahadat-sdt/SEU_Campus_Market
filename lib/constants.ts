@@ -1,0 +1,35 @@
+export const categories = [
+  "Food",
+  "Clothing",
+  "Makeup",
+  "Electronics",
+  "Used Items",
+  "Notes",
+  "Accessories"
+] as const;
+
+export const meetupPoints = [
+  "Main gate",
+  "Library lobby",
+  "Cafeteria",
+  "CSE department floor",
+  "Auditorium entrance",
+  "Central courtyard"
+] as const;
+
+export const orderStatuses = [
+  "PENDING",
+  "CONFIRMED",
+  "READY",
+  "COMPLETED",
+  "CANCELLED"
+] as const;
+
+export function isUniversityEmail(email: string) {
+  const normalized = email.trim().toLowerCase();
+  return (
+    normalized.endsWith("@seu.edu.bd") ||
+    normalized.endsWith("@seu.ac.bd") ||
+    normalized.endsWith("@student.seu.edu.bd")
+  );
+}
