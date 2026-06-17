@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { hideReportedListing, resolveReport } from "@/lib/actions";
+import { hideReportedListing, resolveReport, toggleSponsoredListing } from "@/lib/actions";
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { shortDate } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function AdminPage() {
   await requireAdmin();
-  const [reports, hiddenCount, userCount] = await Promise.all([
+  const [reports, hiddenCount, userCount, listings] = await Promise.all([
     db.report.findMany({
       where: { resolved: false },
       include: { user: true, listing: { include: { seller: true } } },
@@ -17,7 +17,13 @@ export default async function AdminPage() {
       take: 50
     }),
     db.listing.count({ where: { status: "HIDDEN" } }),
-    db.user.count()
+    db.user.count(),
+    db.listing.findMany({
+      where: { status: "ACTIVE" },
+      include: { seller: true },
+      orderBy: [{ sponsored: "desc" }, { createdAt: "desc" }],
+      take: 20
+    })
   ]);
 
   return (
@@ -32,6 +38,31 @@ export default async function AdminPage() {
         <Stat title="Hidden listings" value={hiddenCount.toString()} />
         <Stat title="Students" value={userCount.toString()} />
       </div>
+
+      <Card className="mt-6">
+        <CardHeader><CardTitle>Sponsored listings</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          {listings.map((listing) => (
+            <div key={listing.id} className="grid gap-3 rounded-md border p-3 text-sm md:grid-cols-[1fr_auto]">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link href={`/listings/${listing.id}`} className="font-medium text-primary underline">{listing.title}</Link>
+                  {listing.sponsored && <Badge>Sponsored</Badge>}
+                  <Badge variant="outline">{listing.category}</Badge>
+                </div>
+                <p className="mt-1 text-muted-foreground">Seller: {listing.seller.name}</p>
+              </div>
+              <form action={toggleSponsoredListing}>
+                <input type="hidden" name="listingId" value={listing.id} />
+                <input type="hidden" name="sponsored" value={listing.sponsored ? "false" : "true"} />
+                <Button size="sm" variant={listing.sponsored ? "outline" : "default"}>
+                  {listing.sponsored ? "Remove sponsor" : "Mark sponsored"}
+                </Button>
+              </form>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       <Card className="mt-6">
         <CardHeader><CardTitle>Open reports</CardTitle></CardHeader>

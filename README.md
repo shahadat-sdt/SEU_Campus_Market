@@ -6,14 +6,14 @@ It uses Next.js for frontend/backend, shadcn-style Tailwind components, Prisma, 
 ## Main Features
 
 - SEU email registration, login, and signed session cookie
-- Product listings with category, price, image URL, unique product code, search, and filters
+- Product listings with category, condition, stock quantity, tags, multiple Cloudinary-backed photos, unique product code, search, and filters
 - Seller profile with listings, ratings, and reviews
-- Order placement with safe campus meetup point, quantity, status tracking, and payment confirmation
+- Order placement with safe campus meetup point, stock checks, quantity, SSLCommerz checkout, status tracking, and payment confirmation
 - Buyer/seller order history, transaction records, notifications, reports, and seller dashboard
 - Numeric SEU student email registration, e.g. `2024000000001@seu.edu.bd`
 - Seller listing edit, hide, sold, and delete/archive controls
 - Buyer cancellation, seller rejection notes, payment references, and contact reveal after confirmation
-- Editable seller profiles, password change, unread notifications, and admin report moderation
+- Editable seller profiles, avatar URL, wishlist, voting, comments, unread product-aware notifications, sponsored listings, and admin report moderation
 
 ## Run Locally
 
@@ -44,6 +44,16 @@ npm run dev
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB?schema=public"
 SESSION_SECRET="generate-a-long-random-secret"
+NEXT_PUBLIC_APP_URL="https://your-domain.example"
+CLOUDINARY_CLOUD_NAME="..."
+CLOUDINARY_API_KEY="..."
+CLOUDINARY_API_SECRET="..."
+SSLCOMMERZ_STORE_ID="..."
+SSLCOMMERZ_STORE_PASS="..."
+SSLCOMMERZ_BASE_URL="https://sandbox.sslcommerz.com/gwprocess/v4/api.php"
+BREVO_API_KEY="..."
+BREVO_SENDER_NAME="SEU Campus Market"
+BREVO_SENDER_EMAIL="..."
 ```
 
 You can generate a session secret with:

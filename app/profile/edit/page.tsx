@@ -1,6 +1,7 @@
 import { changePassword, updateProfile } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { meetupPoints } from "@/lib/constants";
+import { AuthSubmitButton } from "@/components/auth-submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
           )}
           <form action={updateProfile} className="grid gap-4">
             <Input name="name" defaultValue={user.name} placeholder="Full name" required />
+            <Input name="avatarUrl" type="url" defaultValue={user.avatarUrl || ""} placeholder="HTTPS profile photo URL" />
             <Input name="phone" defaultValue={user.phone || ""} placeholder="Phone or WhatsApp for confirmed orders" />
             <Select name="preferredPickup" defaultValue={user.preferredPickup || ""}>
               <option value="">No preferred pickup point</option>
@@ -38,7 +40,7 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
               ))}
             </Select>
             <Textarea name="bio" defaultValue={user.bio || ""} placeholder="Short seller bio, department, or buying/selling interests" />
-            <Button>Save profile</Button>
+            <AuthSubmitButton idleLabel="Save profile" pendingLabel="Saving profile" />
           </form>
         </CardContent>
       </Card>

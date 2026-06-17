@@ -11,12 +11,14 @@ enum ListingStatus {
   ACTIVE
   SOLD
   HIDDEN
+  DRAFT
 }
 
 enum OrderStatus {
   PENDING
   CONFIRMED
   READY
+  DELIVERED
   COMPLETED
   CANCELLED
 }
@@ -24,6 +26,7 @@ enum OrderStatus {
 enum PaymentStatus {
   UNPAID
   RECEIVED
+  PAID
 }
 
 enum UserRole {
@@ -31,14 +34,23 @@ enum UserRole {
   ADMIN
 }
 
+enum VoteType {
+  LIKE
+  DISLIKE
+}
+
 model User {
   id                String             @id @default(cuid())
   name              String
   email             String             @unique
   passwordHash      String
+  avatarUrl         String?
   bio               String?
   phone             String?
   preferredPickup   String?
+  emailVerifiedAt   DateTime?
+  emailVerificationToken String?
+  emailVerificationExpires DateTime?
   role              UserRole           @default(STUDENT)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -50,6 +62,9 @@ model User {
   followedCategories FollowedCategory[]
   notifications     Notification[]
   reports           Report[]
+  votes             Vote[]
+  wishlistItems     WishlistItem[]
+  comments          Comment[]
 }
 
 model Listing {
@@ -59,17 +74,30 @@ model Listing {
   description String
   price       Decimal       @db.Decimal(10, 2)
   category    String
+  condition   String        @default("Good")
+  quantity    Int           @default(1)
   imageUrl    String
+  imageUrls   String[]      @default([])
+  tags        String[]      @default([])
+  negotiable  Boolean       @default(false)
+  campusPickup Boolean      @default(true)
+  whatsappContact Boolean   @default(true)
+  deliveryAvailable Boolean @default(false)
+  sponsored   Boolean       @default(false)
   status      ListingStatus @default(ACTIVE)
   sellerId    String
   seller      User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   orders      Order[]
   reports     Report[]
+  votes       Vote[]
+  wishlistItems WishlistItem[]
+  comments    Comment[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
   @@index([category])
   @@index([sellerId])
+  @@index([status, sponsored])
 }
 
 model Order {
@@ -124,6 +152,10 @@ model Notification {
   id        String   @id @default(cuid())
   title     String
   body      String
+  url       String?
+  productId String?
+  productTitle String?
+  orderId   String?
   read      Boolean  @default(false)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -136,7 +168,51 @@ model Report {
   resolved  Boolean  @default(false)
   listingId String?
   listing   Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voteType  VoteType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([listingId, userId])
+  @@index([listingId, voteType])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([listingId, userId])
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  reports   Report[]
+  createdAt DateTime @default(now())
+
+  @@index([listingId, createdAt])
 }

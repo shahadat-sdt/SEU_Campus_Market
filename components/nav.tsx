@@ -41,7 +41,9 @@ export async function Nav() {
                 <Link href="/notifications" aria-label="Notifications" className="relative">
                   <Bell className="h-4 w-4" />
                   {!!unreadCount && (
-                    <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />
+                    <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] leading-none text-primary-foreground">
+                      {unreadCount}
+                    </span>
                   )}
                 </Link>
               </Button>

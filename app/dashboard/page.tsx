@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { deleteListing, updateListingStatus } from "@/lib/actions";
+import { deleteListing, resendVerificationEmail, updateListingStatus, updateOrder } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
-import { listingStatuses } from "@/lib/constants";
+import { listingStatuses, orderStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { money } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,11 @@ export default async function DashboardPage() {
   const [listings, sales, pendingOrders] = await Promise.all([
     db.listing.findMany({ where: { sellerId: user.id }, include: { orders: true }, orderBy: { createdAt: "desc" } }),
     db.order.findMany({ where: { sellerId: user.id, status: "COMPLETED" }, include: { listing: true } }),
-    db.order.findMany({ where: { sellerId: user.id, status: "PENDING" }, include: { listing: true, buyer: true } })
+    db.order.findMany({
+      where: { sellerId: user.id, status: { notIn: ["COMPLETED", "CANCELLED"] } },
+      include: { listing: true, buyer: true },
+      orderBy: { createdAt: "desc" }
+    })
   ]);
 
   const revenue = sales.reduce((sum, order) => sum + Number(order.agreedPrice), 0);
@@ -29,6 +33,15 @@ export default async function DashboardPage() {
         </div>
         <Button asChild><Link href="/listings/new">Post listing</Link></Button>
       </div>
+
+      {!user.emailVerifiedAt && (
+        <div className="mb-6 grid gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+          <p className="font-medium">Verify your email to post listings and place orders.</p>
+          <form action={resendVerificationEmail}>
+            <Button size="sm" variant="outline">Resend verification email</Button>
+          </form>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat title="Total sales" value={money(revenue)} />
@@ -53,15 +66,26 @@ export default async function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Pending orders</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Open orders</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {pendingOrders.map((order) => (
-              <div key={order.id} className="rounded-md border p-3 text-sm">
-                <p className="font-medium">{order.listing.title}</p>
-                <p className="text-muted-foreground">Buyer: {order.buyer.name} · {money(order.agreedPrice.toString())}</p>
+              <div key={order.id} className="grid gap-3 rounded-md border p-3 text-sm">
+                <div>
+                  <p className="font-medium">{order.listing.title}</p>
+                  <p className="text-muted-foreground">Buyer: {order.buyer.name} · {money(order.agreedPrice.toString())}</p>
+                </div>
+                <form action={updateOrder} className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                  <input type="hidden" name="orderId" value={order.id} />
+                  <Select name="status" defaultValue={order.status}>
+                    {orderStatuses.map((status) => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </Select>
+                  <Button size="sm">Update status</Button>
+                </form>
               </div>
             ))}
-            {!pendingOrders.length && <p className="text-sm text-muted-foreground">No pending orders right now.</p>}
+            {!pendingOrders.length && <p className="text-sm text-muted-foreground">No open orders right now.</p>}
           </CardContent>
         </Card>
       </div>

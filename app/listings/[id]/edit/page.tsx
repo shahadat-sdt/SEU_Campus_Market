@@ -1,13 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { updateListing } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
-import { categories } from "@/lib/constants";
+import { ListingForm } from "@/components/listing-form";
 import { db } from "@/lib/db";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -29,7 +25,7 @@ export default async function EditListingPage({
   if (listing.sellerId !== user.id) redirect("/dashboard");
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <main className="mx-auto max-w-5xl px-4 py-8">
       <Card className="shadow-campus">
         <CardHeader>
           <CardTitle>Edit listing</CardTitle>
@@ -43,28 +39,24 @@ export default async function EditListingPage({
               Please fill every required field, use an HTTPS photo URL, and keep the price above zero.
             </p>
           )}
-          <form action={updateListing} className="grid gap-4">
-            <input type="hidden" name="listingId" value={listing.id} />
-            <Input name="title" defaultValue={listing.title} required />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                name="price"
-                type="number"
-                min="1"
-                step="1"
-                defaultValue={listing.price.toString()}
-                required
-              />
-              <Select name="category" required defaultValue={listing.category}>
-                {categories.map((category) => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </Select>
-            </div>
-            <Input name="imageUrl" type="url" defaultValue={listing.imageUrl} required />
-            <Textarea name="description" defaultValue={listing.description} required />
-            <Button>Save changes</Button>
-          </form>
+          <ListingForm
+            action={updateListing}
+            listingId={listing.id}
+            initial={{
+              title: listing.title,
+              description: listing.description,
+              category: listing.category,
+              condition: listing.condition,
+              quantity: listing.quantity,
+              price: listing.price.toString(),
+              imageUrls: listing.imageUrls.length ? listing.imageUrls : [listing.imageUrl],
+              tags: listing.tags,
+              negotiable: listing.negotiable,
+              campusPickup: listing.campusPickup,
+              whatsappContact: listing.whatsappContact,
+              deliveryAvailable: listing.deliveryAvailable
+            }}
+          />
         </CardContent>
       </Card>
     </main>

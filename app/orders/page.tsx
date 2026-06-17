@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { orderStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { money, shortDate } from "@/lib/utils";
+import { CheckoutButton } from "@/components/checkout-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,7 @@ export default async function OrdersPage() {
                 <p className="text-muted-foreground">Seller: {order.seller.name}</p>
                 <p>{order.quantity} item(s), {money(order.agreedPrice.toString())}, pickup at {order.pickupPoint}</p>
                 <p className="text-muted-foreground">Payment: {order.paymentStatus} · {shortDate(order.createdAt)}</p>
+                <OrderProgress status={order.status} />
                 {canRevealContact(order.status) && (
                   <div className="rounded-md border bg-secondary/40 p-3">
                     <p className="font-medium">Seller contact</p>
@@ -61,7 +63,10 @@ export default async function OrdersPage() {
                 )}
                 {order.statusNote && <p className="rounded-md bg-muted p-3 text-muted-foreground">Status note: {order.statusNote}</p>}
                 {order.paymentNote && <p className="rounded-md bg-muted p-3 text-muted-foreground">Payment note: {order.paymentNote}</p>}
-                {order.status !== "CANCELLED" && order.paymentStatus !== "RECEIVED" && (
+                {order.status !== "CANCELLED" && order.paymentStatus !== "RECEIVED" && order.paymentStatus !== "PAID" && (
+                  <CheckoutButton orderId={order.id} />
+                )}
+                {order.status !== "CANCELLED" && order.paymentStatus !== "RECEIVED" && order.paymentStatus !== "PAID" && (
                   <form action={addPaymentNote} className="grid gap-2 rounded-md border p-3">
                     <input type="hidden" name="orderId" value={order.id} />
                     <Input name="paymentNote" placeholder="bKash/Nagad/Cash note or transaction reference" defaultValue={order.paymentNote || ""} required />
@@ -111,6 +116,7 @@ export default async function OrdersPage() {
                 <p className="text-muted-foreground">Buyer: {order.buyer.name}</p>
                 <p>{order.quantity} item(s), {money(order.agreedPrice.toString())}, pickup at {order.pickupPoint}</p>
                 <p className="text-muted-foreground">Payment: {order.paymentStatus} · {shortDate(order.createdAt)}</p>
+                <OrderProgress status={order.status} />
                 {canRevealContact(order.status) && (
                   <div className="rounded-md border bg-secondary/40 p-3">
                     <p className="font-medium">Buyer contact</p>
@@ -135,7 +141,7 @@ export default async function OrdersPage() {
                   </form>
                   <form action={markPaymentReceived}>
                     <input type="hidden" name="orderId" value={order.id} />
-                    <Button size="sm" variant="outline" disabled={order.paymentStatus === "RECEIVED"}>
+                    <Button size="sm" variant="outline" disabled={order.paymentStatus === "RECEIVED" || order.paymentStatus === "PAID"}>
                       <CreditCard className="h-4 w-4" /> Paid
                     </Button>
                   </form>
@@ -151,7 +157,22 @@ export default async function OrdersPage() {
 }
 
 function canRevealContact(status: string) {
-  return status === "CONFIRMED" || status === "READY" || status === "COMPLETED";
+  return status === "CONFIRMED" || status === "READY" || status === "DELIVERED" || status === "COMPLETED";
+}
+
+function OrderProgress({ status }: { status: string }) {
+  const steps = ["PENDING", "CONFIRMED", "READY", "DELIVERED", "COMPLETED"];
+  const active = Math.max(0, steps.indexOf(status));
+  return (
+    <div className="grid grid-cols-5 gap-1">
+      {steps.map((step, index) => (
+        <div key={step} className="space-y-1">
+          <div className={index <= active ? "h-1.5 rounded bg-primary" : "h-1.5 rounded bg-muted"} />
+          <p className="truncate text-[10px] text-muted-foreground">{step === "READY" ? "READY / SHIPPED" : step}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function EmptyState({ text }: { text: string }) {

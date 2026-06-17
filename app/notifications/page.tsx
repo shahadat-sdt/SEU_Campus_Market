@@ -1,4 +1,4 @@
-import { markNotificationsRead } from "@/lib/actions";
+import { markNotificationsRead, openNotification } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { shortDate } from "@/lib/utils";
@@ -39,8 +39,20 @@ export default async function NotificationsPage() {
                     {!notification.read && <Badge variant="mint">New</Badge>}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{notification.body}</p>
+                  {notification.productTitle && (
+                    <p className="mt-1 text-xs text-muted-foreground">Product: {notification.productTitle}</p>
+                  )}
                 </div>
-                <span className="shrink-0 text-xs text-muted-foreground">{shortDate(notification.createdAt)}</span>
+                <div className="grid shrink-0 justify-items-end gap-2">
+                  <span className="text-xs text-muted-foreground">{shortDate(notification.createdAt)}</span>
+                  {notification.url && (
+                    <form action={openNotification}>
+                      <input type="hidden" name="notificationId" value={notification.id} />
+                      <input type="hidden" name="url" value={notification.url} />
+                      <Button size="sm" variant="outline">Open</Button>
+                    </form>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
