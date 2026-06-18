@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, LayoutDashboard, LogOut, PackagePlus, ShieldCheck, ShoppingBag, UserRound } from "lucide-react";
+import { Bell, LogOut, PackagePlus, Search, ShieldCheck, ShoppingBag, UserRound } from "lucide-react";
 import { logout } from "@/lib/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -24,13 +24,13 @@ export async function Nav() {
           {user ? (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link href="/listings/new"><PackagePlus className="h-4 w-4" /> <span className="hidden md:inline">Sell</span></Link>
+                <Link href="/buy"><Search className="h-4 w-4" /> <span className="hidden md:inline">Buy</span></Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/sell"><PackagePlus className="h-4 w-4" /> <span className="hidden md:inline">Sell</span></Link>
               </Button>
               <Button asChild variant="ghost" size="sm">
                 <Link href="/orders"><ShoppingBag className="h-4 w-4" /> <span className="hidden md:inline">Orders</span></Link>
-              </Button>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/dashboard"><LayoutDashboard className="h-4 w-4" /> <span className="hidden md:inline">Dashboard</span></Link>
               </Button>
               {user.role === "ADMIN" && (
                 <Button asChild variant="ghost" size="sm">
@@ -56,6 +56,7 @@ export async function Nav() {
             </>
           ) : (
             <>
+              <Button asChild variant="ghost" size="sm"><Link href="/buy">Buy</Link></Button>
               <Button asChild variant="ghost" size="sm"><Link href="/login">Login</Link></Button>
               <Button asChild size="sm"><Link href="/register">Join</Link></Button>
             </>

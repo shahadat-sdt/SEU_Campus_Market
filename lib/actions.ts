@@ -51,7 +51,7 @@ function orderUrl(orderId?: string) {
 
 async function requireVerifiedUser() {
   const user = await requireUser();
-  if (!user.emailVerifiedAt) redirect("/dashboard?verify=required");
+  if (!user.emailVerifiedAt) redirect("/sell?verify=required");
   return user;
 }
 
@@ -211,6 +211,8 @@ export async function createListing(formData: FormData) {
   }
 
   revalidatePath("/");
+  revalidatePath("/buy");
+  revalidatePath("/sell");
   redirect(`/listings/${listing.id}`);
 }
 
@@ -232,7 +234,7 @@ export async function updateListing(formData: FormData) {
   const deliveryAvailable = value(formData, "deliveryAvailable") === "on";
 
   const listing = await db.listing.findUnique({ where: { id: listingId } });
-  if (!listing || listing.sellerId !== user.id) redirect("/dashboard");
+  if (!listing || listing.sellerId !== user.id) redirect("/sell");
 
   if (!title || title.length > 60 || !description || description.length > 300 || !listingCategories.includes(category as never) || !listingConditions.includes(condition as never) || !isHttpsUrl(imageUrl) || !Number.isFinite(price) || price <= 0) {
     redirect(`/listings/${listingId}/edit?error=missing`);
@@ -258,7 +260,8 @@ export async function updateListing(formData: FormData) {
   });
 
   revalidatePath("/");
-  revalidatePath("/dashboard");
+  revalidatePath("/buy");
+  revalidatePath("/sell");
   revalidatePath(`/listings/${listingId}`);
   redirect(`/listings/${listingId}`);
 }
@@ -268,17 +271,18 @@ export async function updateListingStatus(formData: FormData) {
   const listingId = value(formData, "listingId");
   const status = value(formData, "status") as ListingStatus;
   const returnTo = value(formData, "returnTo");
-  if (!listingStatuses.includes(status as never)) redirect("/dashboard");
+  if (!listingStatuses.includes(status as never)) redirect("/sell");
 
   const listing = await db.listing.findUnique({ where: { id: listingId } });
-  if (!listing || listing.sellerId !== user.id) redirect("/dashboard");
+  if (!listing || listing.sellerId !== user.id) redirect("/sell");
 
   await db.listing.update({ where: { id: listingId }, data: { status } });
 
   revalidatePath("/");
-  revalidatePath("/dashboard");
+  revalidatePath("/buy");
+  revalidatePath("/sell");
   revalidatePath(`/listings/${listingId}`);
-  redirect(safeReturn(returnTo, "/dashboard"));
+  redirect(safeReturn(returnTo, "/sell"));
 }
 
 export async function deleteListing(formData: FormData) {
@@ -289,7 +293,7 @@ export async function deleteListing(formData: FormData) {
     include: { orders: { select: { id: true } } }
   });
 
-  if (!listing || listing.sellerId !== user.id) redirect("/dashboard");
+  if (!listing || listing.sellerId !== user.id) redirect("/sell");
 
   if (listing.orders.length) {
     await db.listing.update({ where: { id: listingId }, data: { status: "HIDDEN" } });
@@ -298,22 +302,23 @@ export async function deleteListing(formData: FormData) {
   }
 
   revalidatePath("/");
-  revalidatePath("/dashboard");
-  redirect("/dashboard");
+  revalidatePath("/buy");
+  revalidatePath("/sell");
+  redirect("/sell");
 }
 
 export async function followCategory(formData: FormData) {
   const user = await requireUser();
   const category = value(formData, "category");
-  if (!listingCategories.includes(category as never)) redirect("/");
+  if (!listingCategories.includes(category as never)) redirect("/buy");
 
   await db.followedCategory.upsert({
     where: { category_userId: { category, userId: user.id } },
     update: {},
     create: { category, userId: user.id }
   });
-  revalidatePath("/");
-  redirect(`/?category=${encodeURIComponent(category)}`);
+  revalidatePath("/buy");
+  redirect(`/buy?category=${encodeURIComponent(category)}`);
 }
 
 export async function placeOrder(formData: FormData) {
@@ -387,7 +392,7 @@ export async function cancelOrder(formData: FormData) {
   });
 
   revalidatePath("/orders");
-  revalidatePath("/dashboard");
+  revalidatePath("/sell");
 }
 
 export async function addPaymentNote(formData: FormData) {
@@ -451,7 +456,7 @@ export async function updateOrder(formData: FormData) {
   });
 
   revalidatePath("/orders");
-  revalidatePath("/dashboard");
+  revalidatePath("/sell");
 }
 
 export async function markPaymentReceived(formData: FormData) {
@@ -473,7 +478,7 @@ export async function markPaymentReceived(formData: FormData) {
     }
   });
   revalidatePath("/orders");
-  revalidatePath("/dashboard");
+  revalidatePath("/sell");
 }
 
 export async function createReview(formData: FormData) {
@@ -561,6 +566,7 @@ export async function toggleVote(formData: FormData) {
     });
   }
   revalidatePath("/");
+  revalidatePath("/buy");
   revalidatePath(`/listings/${listingId}`);
 }
 
@@ -574,6 +580,7 @@ export async function toggleWishlist(formData: FormData) {
     await db.wishlistItem.create({ data: { listingId, userId: user.id } });
   }
   revalidatePath("/");
+  revalidatePath("/buy");
   revalidatePath(`/listings/${listingId}`);
   revalidatePath(`/profile/${user.id}`);
 }
@@ -632,7 +639,7 @@ export async function resendVerificationEmail() {
   if (!user.emailVerifiedAt) {
     await sendVerificationEmail(user.id, user.email, user.name);
   }
-  revalidatePath("/dashboard");
+  revalidatePath("/sell");
 }
 
 export async function changePassword(formData: FormData) {
@@ -672,6 +679,7 @@ export async function hideReportedListing(formData: FormData) {
   }
   revalidatePath("/admin");
   revalidatePath("/");
+  revalidatePath("/buy");
   if (listingId) revalidatePath(`/listings/${listingId}`);
 }
 
@@ -687,5 +695,6 @@ export async function toggleSponsoredListing(formData: FormData) {
   });
   revalidatePath("/admin");
   revalidatePath("/");
+  revalidatePath("/buy");
   revalidatePath(`/listings/${listingId}`);
 }

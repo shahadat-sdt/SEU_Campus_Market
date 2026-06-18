@@ -22,7 +22,7 @@ export default async function EditListingPage({
 
   const listing = await db.listing.findUnique({ where: { id } });
   if (!listing) notFound();
-  if (listing.sellerId !== user.id) redirect("/dashboard");
+  if (listing.sellerId !== user.id) redirect("/sell");
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">

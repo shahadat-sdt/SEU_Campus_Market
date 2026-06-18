@@ -45,9 +45,9 @@ export default async function VerifyEmailPage({ searchParams }: { searchParams: 
           <p className="text-sm text-muted-foreground">
             {verified
               ? "You can now post listings and place orders on SEU Campus Market."
-              : "Request a fresh verification email from your dashboard."}
+              : "Request a fresh verification email from your selling page."}
           </p>
-          <Button asChild><Link href="/dashboard">Go to dashboard</Link></Button>
+          <Button asChild><Link href="/sell">Go to selling</Link></Button>
         </CardContent>
       </Card>
     </main>

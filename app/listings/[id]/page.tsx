@@ -227,7 +227,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Orders for this item appear in your orders page and dashboard.
+                Orders for this item appear in your orders and selling pages.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button asChild variant="outline" size="sm">
