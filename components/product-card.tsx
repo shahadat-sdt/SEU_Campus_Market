@@ -35,7 +35,7 @@ export function ProductCard({ listing }: ProductCardProps) {
   const wishlisted = !!listing.wishlistItems?.length;
 
   return (
-    <Card className="h-full overflow-hidden transition hover:-translate-y-0.5 hover:shadow-campus">
+    <Card className="h-full overflow-hidden transition hover:border-primary/40">
       <Link href={`/listings/${listing.id}`} className="block">
         <div className="relative aspect-[4/3] bg-muted">
           <Image src={image} alt={listing.title} fill className="object-cover" />
@@ -46,17 +46,17 @@ export function ProductCard({ listing }: ProductCardProps) {
           )}
         </div>
       </Link>
-      <CardContent className="space-y-4 pt-4">
+      <CardContent className="space-y-3 pt-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <Link href={`/listings/${listing.id}`} className="line-clamp-2 font-semibold hover:underline">
               {listing.title}
             </Link>
-            <p className="mt-1 text-sm text-muted-foreground">Sold by {listing.seller.name}</p>
+            <p className="mt-1 truncate text-sm text-muted-foreground">Sold by {listing.seller.name}</p>
           </div>
           <Badge variant="mint">{listing.condition}</Badge>
         </div>
-        <p className="line-clamp-2 text-sm text-muted-foreground">{listing.description}</p>
+        <p className="line-clamp-2 min-h-10 text-sm text-muted-foreground">{listing.description}</p>
         <div className="flex items-center justify-between gap-3">
           <span className="text-lg font-semibold">{money(String(listing.price))}</span>
           <Badge variant="outline">{listing.category}</Badge>

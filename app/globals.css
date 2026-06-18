@@ -3,25 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --background: 42 38% 97%;
-  --foreground: 188 31% 12%;
+  --background: 45 20% 98%;
+  --foreground: 210 18% 12%;
   --card: 0 0% 100%;
-  --card-foreground: 188 31% 12%;
+  --card-foreground: 210 18% 12%;
   --popover: 0 0% 100%;
-  --popover-foreground: 188 31% 12%;
-  --primary: 161 69% 37%;
-  --primary-foreground: 44 65% 96%;
-  --secondary: 38 87% 88%;
-  --secondary-foreground: 31 45% 20%;
-  --muted: 176 18% 91%;
-  --muted-foreground: 188 13% 39%;
-  --accent: 350 83% 92%;
-  --accent-foreground: 352 58% 28%;
+  --popover-foreground: 210 18% 12%;
+  --primary: 162 58% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 16% 94%;
+  --secondary-foreground: 210 18% 16%;
+  --muted: 210 14% 93%;
+  --muted-foreground: 210 9% 42%;
+  --accent: 162 24% 92%;
+  --accent-foreground: 162 52% 22%;
   --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 100%;
-  --border: 184 16% 84%;
-  --input: 184 16% 84%;
-  --ring: 161 69% 37%;
+  --border: 210 14% 86%;
+  --input: 210 14% 86%;
+  --ring: 162 58% 30%;
   --radius: 0.5rem;
 }
 
@@ -31,10 +31,7 @@
 
 body {
   min-height: 100vh;
-  background:
-    linear-gradient(135deg, rgba(247, 185, 83, 0.18), transparent 28rem),
-    linear-gradient(315deg, rgba(36, 142, 130, 0.12), transparent 32rem),
-    hsl(var(--background));
+  background: hsl(var(--background));
   color: hsl(var(--foreground));
 }
 
@@ -44,7 +41,7 @@ a {
 
 .campus-grid {
   background-image:
-    linear-gradient(rgba(15, 99, 91, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 99, 91, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(15, 99, 91, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 99, 91, 0.05) 1px, transparent 1px);
   background-size: 28px 28px;
 }
