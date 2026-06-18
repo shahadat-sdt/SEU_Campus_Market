@@ -2,7 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { ListingStatus, OrderStatus, VoteType } from "@prisma/client";
+import { ListingStatus, OrderStatus, UserRole, VoteType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearSession, requireAdmin, requireUser, setSession } from "@/lib/auth";
@@ -683,6 +683,22 @@ export async function hideReportedListing(formData: FormData) {
   if (listingId) revalidatePath(`/listings/${listingId}`);
 }
 
+export async function removeReportedComment(formData: FormData) {
+  await requireAdmin();
+  const reportId = value(formData, "reportId");
+  const commentId = value(formData, "commentId");
+  const listingId = value(formData, "listingId");
+  if (!commentId) redirect("/admin");
+
+  if (reportId) {
+    await db.report.update({ where: { id: reportId }, data: { resolved: true } });
+  }
+  await db.comment.delete({ where: { id: commentId } });
+
+  revalidatePath("/admin");
+  if (listingId) revalidatePath(`/listings/${listingId}`);
+}
+
 export async function toggleSponsoredListing(formData: FormData) {
   await requireAdmin();
   const listingId = value(formData, "listingId");
@@ -697,4 +713,36 @@ export async function toggleSponsoredListing(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/buy");
   revalidatePath(`/listings/${listingId}`);
+}
+
+export async function adminUpdateListingStatus(formData: FormData) {
+  await requireAdmin();
+  const listingId = value(formData, "listingId");
+  const status = value(formData, "status") as ListingStatus;
+  if (!listingId || !listingStatuses.includes(status as never)) redirect("/admin");
+
+  await db.listing.update({ where: { id: listingId }, data: { status } });
+  revalidatePath("/admin");
+  revalidatePath("/buy");
+  revalidatePath("/sell");
+  revalidatePath(`/listings/${listingId}`);
+}
+
+export async function updateUserRole(formData: FormData) {
+  const admin = await requireAdmin();
+  const userId = value(formData, "userId");
+  const role = value(formData, "role") as UserRole;
+  if (!userId || (role !== "ADMIN" && role !== "STUDENT")) redirect("/admin");
+  if (userId === admin.id) redirect("/admin?role=self");
+
+  const target = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
+  if (!target) redirect("/admin?role=missing");
+
+  if (target.role === "ADMIN" && role === "STUDENT") {
+    const adminCount = await db.user.count({ where: { role: "ADMIN" } });
+    if (adminCount <= 1) redirect("/admin?role=last");
+  }
+
+  await db.user.update({ where: { id: userId }, data: { role } });
+  revalidatePath("/admin");
 }
