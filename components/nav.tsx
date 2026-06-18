@@ -3,7 +3,7 @@ import { Bell, LogOut, PackagePlus, Search, ShieldCheck, ShoppingBag, UserRound 
 import { logout } from "@/lib/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export async function Nav() {
   const user = await getCurrentUser();
@@ -37,19 +37,27 @@ export async function Nav() {
                   <Link href="/admin"><ShieldCheck className="h-4 w-4" /> <span className="hidden md:inline">Admin</span></Link>
                 </Button>
               )}
-              <Button asChild variant="ghost" size="icon">
-                <Link href="/notifications" aria-label="Notifications" className="relative">
-                  <Bell className="h-4 w-4" />
-                  {!!unreadCount && (
-                    <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] leading-none text-primary-foreground">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" size="icon">
-                <Link href={`/profile/${user.id}`} aria-label="Profile"><UserRound className="h-4 w-4" /></Link>
-              </Button>
+              <Link
+                href="/notifications"
+                aria-label="Notifications"
+                title="Notifications"
+                className={buttonVariants({ variant: "ghost", size: "icon", className: "relative" })}
+              >
+                <Bell className="h-4 w-4" />
+                {!!unreadCount && (
+                  <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] leading-none text-primary-foreground">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+              <Link
+                href={`/profile/${user.id}`}
+                aria-label="Profile"
+                title="Profile"
+                className={buttonVariants({ variant: "ghost", size: "icon" })}
+              >
+                <UserRound className="h-4 w-4" />
+              </Link>
               <form action={logout}>
                 <Button variant="ghost" size="icon" aria-label="Logout"><LogOut className="h-4 w-4" /></Button>
               </form>
