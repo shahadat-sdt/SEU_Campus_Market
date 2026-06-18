@@ -7,12 +7,13 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma migrate deploy && prisma generate && next build",
+    "build": "npm run db:sync && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",
+    "db:sync": "prisma db execute --schema prisma/schema.prisma --file prisma/migrations/20260618164500_sync_marketplace_schema/migration.sql",
     "postinstall": "prisma generate"
   },
   "dependencies": {
