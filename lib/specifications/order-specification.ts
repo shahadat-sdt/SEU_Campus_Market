@@ -22,6 +22,7 @@ export function canPlaceOrder(input: {
   return (
     input.listing.sellerId !== input.buyerId &&
     input.listing.status === "ACTIVE" &&
+    input.quantity > 0 &&
     input.quantity <= availableListingQuantity(input.listing)
   );
 }

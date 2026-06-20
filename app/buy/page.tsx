@@ -5,6 +5,7 @@ import { ListingQueryBuilder } from "@/lib/builders/listing-query-builder";
 import { categories } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { ProductCard } from "@/components/product-card";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -41,22 +42,22 @@ export default async function BuyPage({ searchParams }: { searchParams: SearchPa
   const regularListings = sponsored ? listings.filter((listing) => listing.id !== sponsored.id) : listings;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <section className="mb-8 grid gap-5 md:grid-cols-[1fr_auto] md:items-end">
+    <main className="mx-auto max-w-7xl px-4 py-8">
+      <section className="section-shell campus-grid mb-8 grid gap-5 rounded-lg border bg-card/85 p-5 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
         <div>
-          <p className="text-sm font-medium text-primary">Buy on campus</p>
+          <p className="text-sm font-semibold text-primary">Buy on campus</p>
           <h1 className="mt-2 text-3xl font-semibold md:text-4xl">Find what students are selling now.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             Search active listings, compare prices, save favorites, and place a request for a safe campus handover.
           </p>
         </div>
-        <div className="rounded-md border bg-card px-4 py-3 text-sm">
+        <div className="rounded-md border bg-background/85 px-4 py-3 text-sm shadow-sm">
           <span className="text-muted-foreground">Active listings</span>
           <span className="ml-3 text-xl font-semibold">{listings.length}</span>
         </div>
       </section>
 
-      <form className="grid gap-3 rounded-lg border bg-card p-3 shadow-sm sm:grid-cols-[1fr_160px_auto]">
+      <form className="grid gap-3 rounded-lg border bg-card/95 p-3 shadow-sm sm:grid-cols-[1fr_160px_auto]">
         {category && <input type="hidden" name="category" value={category} />}
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -67,7 +68,7 @@ export default async function BuyPage({ searchParams }: { searchParams: SearchPa
           <option value="price-low">Price low</option>
           <option value="price-high">Price high</option>
         </Select>
-        <Button type="submit">Search</Button>
+        <PendingSubmitButton pendingChildren="Searching">Search</PendingSubmitButton>
       </form>
 
       <section className="py-6">
@@ -80,13 +81,13 @@ export default async function BuyPage({ searchParams }: { searchParams: SearchPa
         </div>
 
         {sponsored && (
-          <div className="mt-5 rounded-md border bg-card p-4">
+          <div className="mt-5 rounded-lg border bg-card/95 p-4 shadow-sm">
             <p className="mb-3 text-sm font-semibold text-primary">Sponsored</p>
             <ProductCard listing={sponsored} />
           </div>
         )}
 
-        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {regularListings.map((listing) => (
             <ProductCard key={listing.id} listing={listing} />
           ))}

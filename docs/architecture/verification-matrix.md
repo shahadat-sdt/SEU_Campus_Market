@@ -11,4 +11,5 @@
 | Payment callback | `lib/adapters/sslcommerz-adapter.ts` | Callback only marks paid when gateway validation succeeds. |
 | Image upload | `lib/adapters/cloudinary-adapter.ts` | Non-image files are rejected before provider upload. |
 | Admin role change | `lib/commands/admin-commands.ts` | Admin cannot demote themselves or remove the final admin. |
+| Admin-only section | `app/admin/page.tsx` | ADMIN users see the dedicated privileges section for moderation, listing control, sponsorship, and role management. |
 | Browse search | `lib/builders/listing-query-builder.ts` | Category, text search, and sort produce correct Prisma query input. |

@@ -4,8 +4,8 @@ import { Heart, ThumbsDown, ThumbsUp } from "lucide-react";
 import { toggleVote, toggleWishlist } from "@/lib/actions";
 import { safeImageUrl } from "@/lib/image";
 import { money, shortDate } from "@/lib/utils";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 type Vote = { voteType: "LIKE" | "DISLIKE" };
@@ -35,7 +35,7 @@ export function ProductCard({ listing }: ProductCardProps) {
   const wishlisted = !!listing.wishlistItems?.length;
 
   return (
-    <Card className="h-full overflow-hidden transition hover:border-primary/40">
+    <Card className="group h-full overflow-hidden transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-campus">
       <Link href={`/listings/${listing.id}`} className="block">
         <div className="relative aspect-[4/3] bg-muted">
           <img
@@ -43,16 +43,20 @@ export function ProductCard({ listing }: ProductCardProps) {
             alt={listing.title}
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/45 to-transparent" />
           {listing.sponsored && (
-            <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
+            <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground shadow-sm">
               Sponsored
             </span>
           )}
+          <span className="absolute bottom-2 left-2 rounded-md bg-white/95 px-2 py-1 text-sm font-semibold text-foreground shadow-sm">
+            {money(String(listing.price))}
+          </span>
         </div>
       </Link>
-      <CardContent className="space-y-3 pt-4">
+      <CardContent className="flex h-[236px] flex-col gap-3 pt-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <Link href={`/listings/${listing.id}`} className="line-clamp-2 font-semibold hover:underline">
@@ -60,15 +64,15 @@ export function ProductCard({ listing }: ProductCardProps) {
             </Link>
             <p className="mt-1 truncate text-sm text-muted-foreground">Sold by {listing.seller.name}</p>
           </div>
-          <Badge variant="mint">{listing.condition}</Badge>
+          <Badge variant="mint" className="shrink-0">{listing.condition}</Badge>
         </div>
-        <p className="line-clamp-2 min-h-10 text-sm text-muted-foreground">{listing.description}</p>
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-lg font-semibold">{money(String(listing.price))}</span>
+        <p className="line-clamp-2 text-sm leading-5 text-muted-foreground">{listing.description}</p>
+        <div className="mt-auto flex items-center justify-between gap-3">
           <Badge variant="outline">{listing.category}</Badge>
+          <span className="text-xs text-muted-foreground">{shortDate(listing.createdAt)}</span>
         </div>
         <div className="flex items-center justify-between gap-2 border-t pt-3 text-xs text-muted-foreground">
-          <span>{shortDate(listing.createdAt)}</span>
+          <span>Student listing</span>
           <div className="flex items-center gap-1">
             <ActionButton listingId={listing.id} name="voteType" value="LIKE" label={`${likes} likes`}>
               <ThumbsUp className="h-3.5 w-3.5" /> {likes}
@@ -78,9 +82,9 @@ export function ProductCard({ listing }: ProductCardProps) {
             </ActionButton>
             <form action={toggleWishlist}>
               <input type="hidden" name="listingId" value={listing.id} />
-              <Button size="sm" variant={wishlisted ? "secondary" : "ghost"} aria-label="Toggle wishlist">
+              <PendingSubmitButton size="sm" variant={wishlisted ? "secondary" : "ghost"} aria-label="Toggle wishlist" pendingChildren="Saving">
                 <Heart className={wishlisted ? "h-3.5 w-3.5 fill-current" : "h-3.5 w-3.5"} />
-              </Button>
+              </PendingSubmitButton>
             </form>
           </div>
         </div>
@@ -106,9 +110,9 @@ function ActionButton({
     <form action={toggleVote}>
       <input type="hidden" name="listingId" value={listingId} />
       <input type="hidden" name={name} value={value} />
-      <Button size="sm" variant="ghost" aria-label={label}>
+      <PendingSubmitButton size="sm" variant="ghost" aria-label={label} pendingChildren="Saving">
         {children}
-      </Button>
+      </PendingSubmitButton>
     </form>
   );
 }

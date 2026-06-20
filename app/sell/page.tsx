@@ -7,6 +7,7 @@ import { listingStatuses, orderStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { safeImageUrl } from "@/lib/image";
 import { money } from "@/lib/utils";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,10 +42,10 @@ export default async function SellPage() {
   const activeCount = listings.filter((listing) => listing.status === "ACTIVE").length;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-6 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+    <main className="mx-auto max-w-7xl px-4 py-8">
+      <div className="section-shell campus-grid mb-6 grid gap-4 rounded-lg border bg-card/85 p-5 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
         <div>
-          <p className="text-sm font-medium text-primary">Sell on campus</p>
+          <p className="text-sm font-semibold text-primary">Sell on campus</p>
           <h1 className="mt-2 text-3xl font-semibold md:text-4xl">Manage listings and handovers.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             Post products, track open requests, update statuses, and keep buyer communication in one place.
@@ -59,7 +60,9 @@ export default async function SellPage() {
         <div className="mb-6 grid gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
           <p className="font-medium">Verify your email to post listings and place orders.</p>
           <form action={resendVerificationEmail}>
-            <Button size="sm" variant="outline">Resend verification email</Button>
+            <PendingSubmitButton size="sm" variant="outline" pendingChildren="Sending email">
+              Resend verification email
+            </PendingSubmitButton>
           </form>
         </div>
       )}
@@ -92,7 +95,7 @@ export default async function SellPage() {
                       <option key={status} value={status}>{status}</option>
                     ))}
                   </Select>
-                  <Button size="sm">Update</Button>
+                  <PendingSubmitButton size="sm" pendingChildren="Updating">Update</PendingSubmitButton>
                 </form>
               </div>
             ))}
@@ -126,23 +129,25 @@ export default async function SellPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 md:justify-end">
                   <Button asChild size="sm" variant="outline">
                     <Link href={`/listings/${listing.id}/edit`}>Edit</Link>
                   </Button>
-                  <form action={updateListingStatus} className="flex gap-2">
+                  <form action={updateListingStatus} className="grid w-full gap-2 sm:w-auto sm:grid-cols-[128px_auto]">
                     <input type="hidden" name="listingId" value={listing.id} />
                     <input type="hidden" name="returnTo" value="/sell" />
-                    <Select name="status" defaultValue={listing.status} className="w-32">
+                    <Select name="status" defaultValue={listing.status}>
                       {listingStatuses.map((status) => (
                         <option key={status} value={status}>{status}</option>
                       ))}
                     </Select>
-                    <Button size="sm">Save</Button>
+                    <PendingSubmitButton size="sm" pendingChildren="Saving">Save</PendingSubmitButton>
                   </form>
                   <form action={deleteListing}>
                     <input type="hidden" name="listingId" value={listing.id} />
-                    <Button size="sm" variant="destructive">Delete</Button>
+                    <PendingSubmitButton size="sm" variant="destructive" pendingChildren="Deleting">
+                      Delete
+                    </PendingSubmitButton>
                   </form>
                 </div>
               </div>
@@ -157,9 +162,11 @@ export default async function SellPage() {
 
 function Stat({ icon: Icon, title, value }: { icon: LucideIcon; title: string; value: string }) {
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardContent className="pt-5">
-        <Icon className="mb-3 h-5 w-5 text-primary" />
+        <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-accent text-accent-foreground">
+          <Icon className="h-5 w-5" />
+        </div>
         <p className="text-sm text-muted-foreground">{title}</p>
         <p className="mt-2 text-3xl font-semibold">{value}</p>
       </CardContent>

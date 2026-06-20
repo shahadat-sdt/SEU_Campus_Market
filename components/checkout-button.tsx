@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { CreditCard, Loader2 } from "lucide-react";
+import { startGlobalProgress, stopGlobalProgress } from "@/components/navigation-progress";
 import { Button } from "@/components/ui/button";
 
 export function CheckoutButton({ orderId }: { orderId: string }) {
@@ -15,18 +16,25 @@ export function CheckoutButton({ orderId }: { orderId: string }) {
         disabled={isPending}
         onClick={() => {
           setError("");
+          startGlobalProgress();
           startTransition(async () => {
-            const response = await fetch("/api/payments/sslcommerz", {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({ orderId })
-            });
-            const payload = await response.json();
-            if (!response.ok) {
-              setError(payload.error || "Could not start checkout.");
-              return;
+            try {
+              const response = await fetch("/api/payments/sslcommerz", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ orderId })
+              });
+              const payload = await response.json();
+              if (!response.ok) {
+                setError(payload.error || "Could not start checkout.");
+                stopGlobalProgress();
+                return;
+              }
+              window.location.href = payload.gatewayUrl;
+            } catch {
+              setError("Could not start checkout.");
+              stopGlobalProgress();
             }
-            window.location.href = payload.gatewayUrl;
           });
         }}
       >

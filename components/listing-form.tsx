@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { ImagePlus, Loader2, Tag, X } from "lucide-react";
 import { listingCategories, listingConditions } from "@/lib/constants";
+import { startGlobalProgress, stopGlobalProgress } from "@/components/navigation-progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -34,25 +35,39 @@ export function ListingForm({ action, initial, listingId }: ListingFormProps) {
   const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState<string[]>(initial?.imageUrls?.length ? initial.imageUrls : []);
   const [uploadError, setUploadError] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const [previewing, setPreviewing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
   const imageValue = useMemo(() => JSON.stringify(images), [images]);
   const tagsValue = useMemo(() => JSON.stringify(tags), [tags]);
 
+  useEffect(() => {
+    if (isPending || isUploading) {
+      startGlobalProgress();
+      return;
+    }
+    stopGlobalProgress();
+  }, [isPending, isUploading]);
+
   async function uploadFiles(files: FileList | null) {
     if (!files?.length) return;
     setUploadError("");
-    for (const file of Array.from(files).slice(0, 4 - images.length)) {
-      const data = new FormData();
-      data.set("file", file);
-      const response = await fetch("/api/uploads/cloudinary", { method: "POST", body: data });
-      const payload = await response.json();
-      if (!response.ok) {
-        setUploadError(payload.error || "Upload failed.");
-        continue;
+    setIsUploading(true);
+    try {
+      for (const file of Array.from(files).slice(0, 4 - images.length)) {
+        const data = new FormData();
+        data.set("file", file);
+        const response = await fetch("/api/uploads/cloudinary", { method: "POST", body: data });
+        const payload = await response.json();
+        if (!response.ok) {
+          setUploadError(payload.error || "Upload failed.");
+          continue;
+        }
+        setImages((current) => [...current, payload.secureUrl].slice(0, 4));
       }
-      setImages((current) => [...current, payload.secureUrl].slice(0, 4));
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -121,10 +136,10 @@ export function ListingForm({ action, initial, listingId }: ListingFormProps) {
             }}
             className="mt-4 grid min-h-36 cursor-pointer place-items-center rounded-md border border-dashed bg-muted/40 p-6 text-center"
           >
-            <input className="sr-only" type="file" accept="image/*" multiple onChange={(event) => uploadFiles(event.target.files)} />
+            <input className="sr-only" type="file" accept="image/*" multiple disabled={isUploading || images.length >= 4} onChange={(event) => uploadFiles(event.target.files)} />
             <span className="grid gap-2 text-sm text-muted-foreground">
-              <ImagePlus className="mx-auto h-8 w-8 text-primary" />
-              Upload up to 4 product photos
+              {isUploading ? <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" /> : <ImagePlus className="mx-auto h-8 w-8 text-primary" />}
+              {isUploading ? "Uploading photos..." : images.length >= 4 ? "Maximum 4 photos uploaded" : "Upload up to 4 product photos"}
             </span>
           </label>
           {uploadError && <p className="mt-3 text-sm text-destructive">{uploadError}</p>}
@@ -228,10 +243,10 @@ export function ListingForm({ action, initial, listingId }: ListingFormProps) {
         </section>
 
         <div className="flex flex-wrap gap-3">
-          <Button type="button" variant="outline" disabled={isPending} onClick={() => submit("draft")}>
+          <Button type="button" variant="outline" disabled={isPending || isUploading} onClick={() => submit("draft")}>
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />} Save draft
           </Button>
-          <Button type="button" disabled={isPending || !images.length} onClick={() => setPreviewing(true)}>
+          <Button type="button" disabled={isPending || isUploading || !images.length} onClick={() => setPreviewing(true)}>
             Preview & Publish
           </Button>
         </div>
@@ -247,7 +262,7 @@ export function ListingForm({ action, initial, listingId }: ListingFormProps) {
               <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                 {tags.map((tag) => <span key={tag}>#{tag}</span>)}
               </div>
-              <Button disabled={isPending} onClick={() => submit("publish")}>
+              <Button disabled={isPending || isUploading} onClick={() => submit("publish")}>
                 {isPending && <Loader2 className="h-4 w-4 animate-spin" />} Publish listing
               </Button>
             </div>

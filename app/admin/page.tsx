@@ -20,8 +20,8 @@ import { requireAdmin } from "@/lib/auth";
 import { listingStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { money, shortDate } from "@/lib/utils";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 
@@ -105,6 +105,51 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         </div>
       )}
 
+      <section className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-semibold">Admin privileges</h2>
+              <Badge variant="mint"><ShieldCheck className="h-3.5 w-3.5" /> Admin only</Badge>
+            </div>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+              This section is only available to accounts with the ADMIN role and matches the documented command-layer privileges.
+            </p>
+          </div>
+          <div className="rounded-md border bg-secondary/50 px-3 py-2 text-sm">
+            <span className="text-muted-foreground">Current role</span>
+            <span className="ml-2 font-semibold">{admin.role}</span>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <PrivilegeCard
+            icon={AlertTriangle}
+            title="Moderate reports"
+            description="Hide reported listings, remove reported comments, or dismiss safe reports."
+            href="#moderation"
+          />
+          <PrivilegeCard
+            icon={CircleDot}
+            title="Control listings"
+            description="Set marketplace listing status to active, sold, hidden, or draft."
+            href="#listings-control"
+          />
+          <PrivilegeCard
+            icon={Star}
+            title="Sponsor listings"
+            description="Promote or remove sponsored visibility for selected listings."
+            href="#listings-control"
+          />
+          <PrivilegeCard
+            icon={UsersRound}
+            title="Manage roles"
+            description="Promote trusted users to admin or return admins to student role with safety checks."
+            href="#people-permissions"
+          />
+        </div>
+      </section>
+
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Stat icon={AlertTriangle} title="Open reports" value={openReports.toString()} />
         <Stat icon={CircleDot} title="Active listings" value={activeListings.toString()} />
@@ -114,7 +159,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       </section>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <Card>
+        <Card id="moderation">
           <CardHeader>
             <CardTitle>Moderation queue</CardTitle>
           </CardHeader>
@@ -152,7 +197,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                       <form action={hideReportedListing}>
                         <input type="hidden" name="reportId" value={report.id} />
                         <input type="hidden" name="listingId" value={report.listingId} />
-                        <Button size="sm" variant="destructive">Hide listing</Button>
+                        <PendingSubmitButton size="sm" variant="destructive" pendingChildren="Hiding">
+                          Hide listing
+                        </PendingSubmitButton>
                       </form>
                     )}
                     {report.commentId && (
@@ -160,12 +207,16 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                         <input type="hidden" name="reportId" value={report.id} />
                         <input type="hidden" name="commentId" value={report.commentId} />
                         <input type="hidden" name="listingId" value={listingId} />
-                        <Button size="sm" variant="destructive">Remove comment</Button>
+                        <PendingSubmitButton size="sm" variant="destructive" pendingChildren="Removing">
+                          Remove comment
+                        </PendingSubmitButton>
                       </form>
                     )}
                     <form action={resolveReport}>
                       <input type="hidden" name="reportId" value={report.id} />
-                      <Button size="sm" variant="outline">Dismiss</Button>
+                      <PendingSubmitButton size="sm" variant="outline" pendingChildren="Dismissing">
+                        Dismiss
+                      </PendingSubmitButton>
                     </form>
                   </div>
                 </div>
@@ -175,7 +226,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="people-permissions">
           <CardHeader>
             <CardTitle>People and permissions</CardTitle>
           </CardHeader>
@@ -197,13 +248,15 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                 <p className="text-xs text-muted-foreground">
                   {user._count.listings} listings · {user._count.purchases} purchases · {user._count.sales} sales · {user._count.reports} reports filed
                 </p>
-                <form action={updateUserRole} className="flex gap-2">
+                <form action={updateUserRole} className="grid gap-2 sm:grid-cols-[1fr_auto]">
                   <input type="hidden" name="userId" value={user.id} />
                   <Select name="role" defaultValue={user.role} disabled={user.id === admin.id}>
                     <option value="STUDENT">Student</option>
                     <option value="ADMIN">Admin</option>
                   </Select>
-                  <Button size="sm" disabled={user.id === admin.id}>Save</Button>
+                  <PendingSubmitButton size="sm" disabled={user.id === admin.id} pendingChildren="Saving">
+                    Save
+                  </PendingSubmitButton>
                 </form>
               </div>
             ))}
@@ -211,7 +264,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         </Card>
       </section>
 
-      <Card className="mt-6">
+      <Card id="listings-control" className="mt-6">
         <CardHeader>
           <CardTitle>Listings control</CardTitle>
         </CardHeader>
@@ -229,22 +282,22 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                   Seller: {listing.seller.name} · {listing.category} · {money(listing.price.toString())}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <form action={adminUpdateListingStatus} className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                <form action={adminUpdateListingStatus} className="grid w-full gap-2 sm:w-auto sm:grid-cols-[128px_auto]">
                   <input type="hidden" name="listingId" value={listing.id} />
-                  <Select name="status" defaultValue={listing.status} className="w-32">
+                  <Select name="status" defaultValue={listing.status}>
                     {listingStatuses.map((status) => (
                       <option key={status} value={status}>{status}</option>
                     ))}
                   </Select>
-                  <Button size="sm">Set</Button>
+                  <PendingSubmitButton size="sm" pendingChildren="Setting">Set</PendingSubmitButton>
                 </form>
                 <form action={toggleSponsoredListing}>
                   <input type="hidden" name="listingId" value={listing.id} />
                   <input type="hidden" name="sponsored" value={listing.sponsored ? "false" : "true"} />
-                  <Button size="sm" variant={listing.sponsored ? "outline" : "default"}>
+                  <PendingSubmitButton size="sm" variant={listing.sponsored ? "outline" : "default"} pendingChildren="Saving">
                     {listing.sponsored ? "Unsponsor" : "Sponsor"}
-                  </Button>
+                  </PendingSubmitButton>
                 </form>
               </div>
             </div>
@@ -265,5 +318,27 @@ function Stat({ icon: Icon, title, value }: { icon: LucideIcon; title: string; v
         <p className="mt-2 text-3xl font-semibold">{value}</p>
       </CardContent>
     </Card>
+  );
+}
+
+function PrivilegeCard({
+  icon: Icon,
+  title,
+  description,
+  href
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  href: string;
+}) {
+  return (
+    <Link href={href} className="grid gap-3 rounded-md border bg-background/80 p-3 text-sm transition hover:border-primary/40 hover:bg-accent">
+      <span className="grid h-9 w-9 place-items-center rounded-md bg-primary/10 text-primary">
+        <Icon className="h-4 w-4" />
+      </span>
+      <span className="font-semibold">{title}</span>
+      <span className="leading-5 text-muted-foreground">{description}</span>
+    </Link>
   );
 }

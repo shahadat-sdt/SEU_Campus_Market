@@ -3,6 +3,7 @@ import { Bell, LogOut, PackagePlus, Search, ShieldCheck, ShoppingBag, UserRound 
 import { logout } from "@/lib/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 export async function Nav() {
@@ -12,15 +13,15 @@ export async function Nav() {
     : 0;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border/80 bg-background/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground">
+    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+        <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-sm text-primary-foreground shadow-sm">
             SE
           </span>
-          <span className="hidden sm:inline">SEU Campus Market</span>
+          <span className="hidden truncate sm:inline">SEU Campus Market</span>
         </Link>
-        <nav className="flex items-center gap-1">
+        <nav className="flex min-w-0 items-center gap-1 overflow-x-auto">
           {user ? (
             <>
               <Button asChild variant="ghost" size="sm">
@@ -33,8 +34,8 @@ export async function Nav() {
                 <Link href="/orders"><ShoppingBag className="h-4 w-4" /> <span className="hidden md:inline">Orders</span></Link>
               </Button>
               {user.role === "ADMIN" && (
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/admin"><ShieldCheck className="h-4 w-4" /> <span className="hidden md:inline">Admin</span></Link>
+                <Button asChild variant="default" size="sm" className="shrink-0">
+                  <Link href="/admin"><ShieldCheck className="h-4 w-4" /> <span>Admin</span></Link>
                 </Button>
               )}
               <Link
@@ -59,7 +60,9 @@ export async function Nav() {
                 <UserRound className="h-4 w-4" />
               </Link>
               <form action={logout}>
-                <Button variant="ghost" size="icon" aria-label="Logout"><LogOut className="h-4 w-4" /></Button>
+                <PendingSubmitButton variant="ghost" size="icon" aria-label="Logout" pendingChildren={<span className="sr-only">Logging out</span>}>
+                  <LogOut className="h-4 w-4" />
+                </PendingSubmitButton>
               </form>
             </>
           ) : (

@@ -8,6 +8,7 @@ import { listingStatuses, meetupPoints } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { listingHeroImageFallback, safeImageUrl } from "@/lib/image";
 import { money, shortDate } from "@/lib/utils";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { ReportButton } from "@/components/report-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -140,31 +141,37 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
               <form action={toggleVote}>
                 <input type="hidden" name="listingId" value={listing.id} />
                 <input type="hidden" name="voteType" value="LIKE" />
-                <Button variant="outline" size="sm"><ThumbsUp className="h-4 w-4" /> {likes}</Button>
+                <PendingSubmitButton variant="outline" size="sm" pendingChildren="Saving">
+                  <ThumbsUp className="h-4 w-4" /> {likes}
+                </PendingSubmitButton>
               </form>
               <form action={toggleVote}>
                 <input type="hidden" name="listingId" value={listing.id} />
                 <input type="hidden" name="voteType" value="DISLIKE" />
-                <Button variant="outline" size="sm"><ThumbsDown className="h-4 w-4" /> {dislikes}</Button>
+                <PendingSubmitButton variant="outline" size="sm" pendingChildren="Saving">
+                  <ThumbsDown className="h-4 w-4" /> {dislikes}
+                </PendingSubmitButton>
               </form>
               <form action={toggleWishlist}>
                 <input type="hidden" name="listingId" value={listing.id} />
-                <Button variant={wishlisted ? "secondary" : "outline"} size="sm">
+                <PendingSubmitButton variant={wishlisted ? "secondary" : "outline"} size="sm" pendingChildren="Saving">
                   <Heart className={wishlisted ? "h-4 w-4 fill-current" : "h-4 w-4"} /> Wishlist
-                </Button>
+                </PendingSubmitButton>
               </form>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="comments">
           <CardHeader><CardTitle className="flex items-center gap-2"><MessageCircle className="h-5 w-5" /> Comments</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {user ? (
               <form action={createComment} className="grid gap-2 rounded-md border p-3">
                 <input type="hidden" name="listingId" value={listing.id} />
                 <Textarea name="body" maxLength={500} placeholder="Ask a product question or leave a public comment" required />
-                <Button size="sm" className="justify-self-start">Post comment</Button>
+                <PendingSubmitButton size="sm" className="w-full sm:w-auto sm:justify-self-start" pendingChildren="Posting comment">
+                  Post comment
+                </PendingSubmitButton>
               </form>
             ) : (
               <p className="text-sm text-muted-foreground">Login to comment on this product.</p>
@@ -180,7 +187,9 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
                     <form action={reportComment}>
                       <input type="hidden" name="commentId" value={comment.id} />
                       <input type="hidden" name="listingId" value={listing.id} />
-                      <Button variant="ghost" size="sm">Report</Button>
+                      <PendingSubmitButton variant="ghost" size="sm" pendingChildren="Reporting">
+                        Report
+                      </PendingSubmitButton>
                     </form>
                   )}
                 </div>
@@ -192,11 +201,11 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
                   </div>
                 ))}
                 {isSeller && (
-                  <form action={createComment} className="flex gap-2">
+                  <form action={createComment} className="grid gap-2 sm:grid-cols-[1fr_auto]">
                     <input type="hidden" name="listingId" value={listing.id} />
                     <input type="hidden" name="parentId" value={comment.id} />
                     <Input name="body" placeholder="Reply as seller" required />
-                    <Button size="sm">Reply</Button>
+                    <PendingSubmitButton size="sm" pendingChildren="Replying">Reply</PendingSubmitButton>
                   </form>
                 )}
               </div>
@@ -268,11 +277,13 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
                       <option key={status} value={status}>{status}</option>
                     ))}
                   </Select>
-                  <Button size="sm">Save</Button>
+                  <PendingSubmitButton size="sm" pendingChildren="Saving">Save</PendingSubmitButton>
                 </form>
                 <form action={deleteListing}>
                   <input type="hidden" name="listingId" value={listing.id} />
-                  <Button size="sm" variant="destructive">Delete</Button>
+                  <PendingSubmitButton size="sm" variant="destructive" pendingChildren="Deleting">
+                    Delete
+                  </PendingSubmitButton>
                 </form>
               </div>
             </CardContent>
@@ -311,29 +322,39 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
 
 async function OrderBox({ listingId, stock, showStockError }: { listingId: string; stock: number; showStockError: boolean }) {
   await requireUser();
+  const isOutOfStock = stock < 1;
+
   return (
     <Card className="shadow-campus">
       <CardHeader>
-        <CardTitle>Place order</CardTitle>
+        <CardTitle>{isOutOfStock ? "Out of stock" : "Place order"}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={placeOrder} className="space-y-4">
-          <input type="hidden" name="listingId" value={listingId} />
-          {showStockError && (
-            <p className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-              Requested quantity exceeds available stock.
-            </p>
-          )}
-          <Input name="quantity" type="number" min="1" max={stock} defaultValue="1" required />
-          <Select name="pickupPoint" required defaultValue="">
-            <option value="" disabled>Safe meetup point</option>
-            {meetupPoints.map((point) => (
-              <option key={point} value={point}>{point}</option>
-            ))}
-          </Select>
-          <Textarea name="note" placeholder="Preferred time, class break, or payment note" />
-          <Button className="w-full">Send order request</Button>
-        </form>
+        {isOutOfStock ? (
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+            This listing has no available stock right now. The seller may restock it later, or existing requests may be cancelled.
+          </div>
+        ) : (
+          <form action={placeOrder} className="space-y-4">
+            <input type="hidden" name="listingId" value={listingId} />
+            {showStockError && (
+              <p className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                Requested quantity exceeds available stock.
+              </p>
+            )}
+            <Input name="quantity" type="number" min="1" max={stock} defaultValue="1" required />
+            <Select name="pickupPoint" required defaultValue="">
+              <option value="" disabled>Safe meetup point</option>
+              {meetupPoints.map((point) => (
+                <option key={point} value={point}>{point}</option>
+              ))}
+            </Select>
+            <Textarea name="note" placeholder="Preferred time, class break, or payment note" />
+            <PendingSubmitButton className="w-full" pendingChildren="Sending request">
+              Send order request
+            </PendingSubmitButton>
+          </form>
+        )}
       </CardContent>
     </Card>
   );

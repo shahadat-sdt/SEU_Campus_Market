@@ -6,8 +6,8 @@ import { orderStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { money, shortDate } from "@/lib/utils";
 import { CheckoutButton } from "@/components/checkout-button";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -70,14 +70,18 @@ export default async function OrdersPage() {
                   <form action={addPaymentNote} className="grid gap-2 rounded-md border p-3">
                     <input type="hidden" name="orderId" value={order.id} />
                     <Input name="paymentNote" placeholder="bKash/Nagad/Cash note or transaction reference" defaultValue={order.paymentNote || ""} required />
-                    <Button size="sm" variant="outline"><CreditCard className="h-4 w-4" /> Save payment note</Button>
+                    <PendingSubmitButton size="sm" variant="outline" pendingChildren="Saving note">
+                      <CreditCard className="h-4 w-4" /> Save payment note
+                    </PendingSubmitButton>
                   </form>
                 )}
                 {order.status === "PENDING" && (
                   <form action={cancelOrder} className="grid gap-2 rounded-md border p-3">
                     <input type="hidden" name="orderId" value={order.id} />
                     <Input name="reason" placeholder="Cancellation reason" />
-                    <Button size="sm" variant="destructive"><XCircle className="h-4 w-4" /> Cancel request</Button>
+                    <PendingSubmitButton size="sm" variant="destructive" pendingChildren="Cancelling">
+                      <XCircle className="h-4 w-4" /> Cancel request
+                    </PendingSubmitButton>
                   </form>
                 )}
                 {order.status === "COMPLETED" && !order.review && (
@@ -91,7 +95,7 @@ export default async function OrdersPage() {
                       <option value="1">1 star</option>
                     </Select>
                     <Textarea name="comment" placeholder="Write a short seller review" required />
-                    <Button size="sm">Submit review</Button>
+                    <PendingSubmitButton size="sm" pendingChildren="Submitting review">Submit review</PendingSubmitButton>
                   </form>
                 )}
               </CardContent>
@@ -129,21 +133,23 @@ export default async function OrdersPage() {
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                   <form action={updateOrder} className="grid gap-2">
                     <input type="hidden" name="orderId" value={order.id} />
-                    <div className="flex gap-2">
+                    <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                       <Select name="status" defaultValue={order.status}>
                         {orderStatuses.map((status) => (
                           <option key={status} value={status}>{status}</option>
                         ))}
                       </Select>
-                      <Button size="sm"><PackageCheck className="h-4 w-4" /> Update</Button>
+                      <PendingSubmitButton size="sm" pendingChildren="Updating">
+                        <PackageCheck className="h-4 w-4" /> Update
+                      </PendingSubmitButton>
                     </div>
                     <Input name="statusNote" placeholder="Optional update or rejection reason" defaultValue={order.statusNote || ""} />
                   </form>
                   <form action={markPaymentReceived}>
                     <input type="hidden" name="orderId" value={order.id} />
-                    <Button size="sm" variant="outline" disabled={order.paymentStatus === "RECEIVED" || order.paymentStatus === "PAID"}>
+                    <PendingSubmitButton size="sm" variant="outline" disabled={order.paymentStatus === "RECEIVED" || order.paymentStatus === "PAID"} pendingChildren="Marking paid">
                       <CreditCard className="h-4 w-4" /> Paid
-                    </Button>
+                    </PendingSubmitButton>
                   </form>
                 </div>
               </CardContent>

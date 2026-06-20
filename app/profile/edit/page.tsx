@@ -2,7 +2,7 @@ import { changePassword, updateProfile } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { meetupPoints } from "@/lib/constants";
 import { AuthSubmitButton } from "@/components/auth-submit-button";
-import { Button } from "@/components/ui/button";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -64,7 +64,9 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
           <form action={changePassword} className="grid gap-4">
             <Input name="currentPassword" type="password" placeholder="Current password" required />
             <Input name="newPassword" type="password" minLength={6} placeholder="New password" required />
-            <Button variant="outline">Update password</Button>
+            <PendingSubmitButton variant="outline" pendingChildren="Updating password">
+              Update password
+            </PendingSubmitButton>
           </form>
         </CardContent>
       </Card>

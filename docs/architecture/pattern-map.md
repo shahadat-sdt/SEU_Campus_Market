@@ -22,3 +22,4 @@ Use these paths when explaining the architecture:
 2. Place order: `lib/actions.ts` -> `lib/services/order-service.ts` -> `lib/specifications/order-specification.ts` -> `lib/repositories/order-repository.ts` -> `lib/events/domain-event-bus.ts`.
 3. Start payment: `app/api/payments/sslcommerz/route.ts` -> `lib/services/payment-service.ts` -> `lib/strategies/payment-strategy.ts` -> `lib/adapters/sslcommerz-adapter.ts`.
 4. Upload image: `app/api/uploads/cloudinary/route.ts` -> `lib/adapters/cloudinary-adapter.ts` -> `lib/decorators/fetch-decorators.ts`.
+5. Admin privileges: `app/admin/page.tsx` -> `lib/actions.ts` -> `lib/commands/admin-commands.ts` -> repositories/specifications.

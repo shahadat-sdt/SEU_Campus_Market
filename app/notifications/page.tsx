@@ -2,8 +2,8 @@ import { markNotificationsRead, openNotification } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { shortDate } from "@/lib/utils";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default async function NotificationsPage() {
@@ -24,7 +24,9 @@ export default async function NotificationsPage() {
         </div>
         {!!unreadCount && (
           <form action={markNotificationsRead}>
-            <Button variant="outline" size="sm">Mark all read</Button>
+            <PendingSubmitButton variant="outline" size="sm" pendingChildren="Marking read">
+              Mark all read
+            </PendingSubmitButton>
           </form>
         )}
       </div>
@@ -49,7 +51,9 @@ export default async function NotificationsPage() {
                     <form action={openNotification}>
                       <input type="hidden" name="notificationId" value={notification.id} />
                       <input type="hidden" name="url" value={notification.url} />
-                      <Button size="sm" variant="outline">Open</Button>
+                      <PendingSubmitButton size="sm" variant="outline" pendingChildren="Opening">
+                        Open
+                      </PendingSubmitButton>
                     </form>
                   )}
                 </div>

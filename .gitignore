@@ -8,3 +8,4 @@ coverage
 .idea
 .vercel
 .env*.local
+.DS_Store
