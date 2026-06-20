@@ -6,6 +6,7 @@ import { createComment, deleteListing, placeOrder, reportComment, toggleVote, to
 import { getCurrentUser, requireUser } from "@/lib/auth";
 import { listingStatuses, meetupPoints } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { listingHeroImageFallback, safeImageUrl } from "@/lib/image";
 import { money, shortDate } from "@/lib/utils";
 import { ReportButton } from "@/components/report-button";
 import { Badge } from "@/components/ui/badge";
@@ -25,18 +26,31 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   const listing = await db.listing.findUnique({
     where: { id },
     include: {
-      seller: { include: { reviewsReceived: { include: { buyer: true }, orderBy: { createdAt: "desc" } } } },
-      reports: true,
+      seller: {
+        include: {
+          reviewsReceived: {
+            include: { buyer: { select: { id: true, name: true } } },
+            orderBy: { createdAt: "desc" },
+            take: 8
+          }
+        }
+      },
+      reports: { select: { id: true } },
       orders: { where: { status: { not: "CANCELLED" } }, select: { quantity: true } },
-      votes: true,
-      wishlistItems: user ? { where: { userId: user.id } } : false,
+      votes: { select: { voteType: true } },
+      wishlistItems: user ? { where: { userId: user.id }, select: { id: true } } : false,
       comments: {
         where: { parentId: null },
         include: {
-          user: true,
-          replies: { include: { user: true }, orderBy: { createdAt: "asc" } }
+          user: { select: { id: true, name: true } },
+          replies: {
+            include: { user: { select: { id: true, name: true } } },
+            orderBy: { createdAt: "asc" },
+            take: 10
+          }
         },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
+        take: 25
       }
     }
   });
@@ -46,7 +60,8 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   const reviews = listing.seller.reviewsReceived;
   const rating = reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
   const isSeller = user?.id === listing.sellerId;
-  const images = listing.imageUrls.length ? listing.imageUrls : [listing.imageUrl || "https://placehold.co/1200x900?text=SEU+Market"];
+  const images = (listing.imageUrls.length ? listing.imageUrls : [listing.imageUrl])
+    .map((image) => safeImageUrl(image, listingHeroImageFallback));
   const likes = listing.votes.filter((vote) => vote.voteType === "LIKE").length;
   const dislikes = listing.votes.filter((vote) => vote.voteType === "DISLIKE").length;
   const wishlisted = !!listing.wishlistItems.length;
@@ -59,13 +74,25 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
     <main className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1.2fr_0.8fr]">
       <section className="space-y-5">
         <div className="relative overflow-hidden rounded-md border bg-muted shadow-campus">
-          <Image src={images[0]} alt={listing.title} width={1200} height={900} className="aspect-[4/3] w-full object-cover" />
+          <img
+            src={images[0]}
+            alt={listing.title}
+            decoding="async"
+            fetchPriority="high"
+            className="aspect-[4/3] w-full object-cover"
+          />
         </div>
         {images.length > 1 && (
           <div className="grid grid-cols-4 gap-3">
             {images.slice(0, 4).map((image, index) => (
               <div key={image} className="relative overflow-hidden rounded-md border bg-muted">
-                <Image src={image} alt={`${listing.title} photo ${index + 1}`} width={240} height={180} className="aspect-[4/3] w-full object-cover" />
+                <img
+                  src={image}
+                  alt={`${listing.title} photo ${index + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-[4/3] w-full object-cover"
+                />
               </div>
             ))}
           </div>

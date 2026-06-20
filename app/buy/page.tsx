@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { categories, listingCategories } from "@/lib/constants";
+import { ListingQueryBuilder } from "@/lib/builders/listing-query-builder";
+import { categories } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
@@ -20,32 +21,21 @@ export default async function BuyPage({ searchParams }: { searchParams: SearchPa
   const q = first(params.q) || "";
   const category = first(params.category) || "";
   const sort = first(params.sort) || "newest";
+  const listingQuery = new ListingQueryBuilder()
+    .withCategory(category)
+    .withSearch(q)
+    .sortedBy(sort)
+    .build();
 
   const listings = await db.listing.findMany({
-    where: {
-      status: "ACTIVE",
-      ...(category && listingCategories.includes(category as never) ? { category } : {}),
-      ...(q
-        ? {
-            OR: [
-              { title: { contains: q, mode: "insensitive" } },
-              { description: { contains: q, mode: "insensitive" } },
-              { code: { contains: q.toUpperCase(), mode: "insensitive" } },
-              { tags: { has: q } }
-            ]
-          }
-        : {})
-    },
+    where: listingQuery.where,
     include: {
       seller: true,
-      votes: true,
-      wishlistItems: user ? { where: { userId: user.id } } : false
+      votes: { select: { voteType: true } },
+      wishlistItems: user ? { where: { userId: user.id }, select: { id: true } } : false
     },
-    orderBy: sort === "price-low"
-      ? { price: "asc" }
-      : sort === "price-high"
-        ? { price: "desc" }
-        : [{ sponsored: "desc" }, { createdAt: "desc" }]
+    orderBy: listingQuery.orderBy,
+    take: 48
   });
   const sponsored = listings.find((listing) => listing.sponsored);
   const regularListings = sponsored ? listings.filter((listing) => listing.id !== sponsored.id) : listings;

@@ -42,25 +42,31 @@ export default async function ProfilePage({ params }: { params: Params }) {
         where: currentUser?.id === id ? {} : { status: "ACTIVE" },
         include: {
           seller: true,
-          votes: true,
-          wishlistItems: currentUser ? { where: { userId: currentUser.id } } : false
+          votes: { select: { voteType: true } },
+          wishlistItems: currentUser ? { where: { userId: currentUser.id }, select: { id: true } } : false
         },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
+        take: 24
       },
-      purchases: { include: { listing: true, seller: true }, orderBy: { createdAt: "desc" } },
+      purchases: { include: { listing: true, seller: true }, orderBy: { createdAt: "desc" }, take: 12 },
       wishlistItems: {
         include: {
           listing: {
             include: {
               seller: true,
-              votes: true,
-              wishlistItems: currentUser ? { where: { userId: currentUser.id } } : false
+              votes: { select: { voteType: true } },
+              wishlistItems: currentUser ? { where: { userId: currentUser.id }, select: { id: true } } : false
             }
           }
         },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
+        take: 24
       },
-      reviewsReceived: { include: { buyer: true }, orderBy: { createdAt: "desc" } }
+      reviewsReceived: {
+        include: { buyer: { select: { id: true, name: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 12
+      }
     }
   });
   if (!seller) notFound();

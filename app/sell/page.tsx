@@ -5,6 +5,7 @@ import { deleteListing, resendVerificationEmail, updateListingStatus, updateOrde
 import { requireUser } from "@/lib/auth";
 import { listingStatuses, orderStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { safeImageUrl } from "@/lib/image";
 import { money } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,12 +15,25 @@ import { Select } from "@/components/ui/select";
 export default async function SellPage() {
   const user = await requireUser();
   const [listings, sales, pendingOrders] = await Promise.all([
-    db.listing.findMany({ where: { sellerId: user.id }, include: { orders: true }, orderBy: { createdAt: "desc" } }),
-    db.order.findMany({ where: { sellerId: user.id, status: "COMPLETED" }, include: { listing: true } }),
+    db.listing.findMany({
+      where: { sellerId: user.id },
+      include: { orders: { select: { id: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 60
+    }),
+    db.order.findMany({
+      where: { sellerId: user.id, status: "COMPLETED" },
+      select: { agreedPrice: true },
+      take: 200
+    }),
     db.order.findMany({
       where: { sellerId: user.id, status: { notIn: ["COMPLETED", "CANCELLED"] } },
-      include: { listing: true, buyer: true },
-      orderBy: { createdAt: "desc" }
+      include: {
+        listing: { select: { id: true, title: true } },
+        buyer: { select: { id: true, name: true } }
+      },
+      orderBy: { createdAt: "desc" },
+      take: 30
     })
   ]);
 
@@ -90,18 +104,27 @@ export default async function SellPage() {
           <CardHeader><CardTitle>Your listings</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {listings.map((listing) => (
-              <div key={listing.id} className="grid gap-3 rounded-md border p-3 text-sm md:grid-cols-[1fr_auto]">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link href={`/listings/${listing.id}`} className="font-medium text-primary underline">
-                      {listing.title}
-                    </Link>
-                    <Badge variant={listing.status === "ACTIVE" ? "mint" : "warm"}>{listing.status}</Badge>
-                    <Badge variant="outline">{listing.category}</Badge>
+              <div key={listing.id} className="grid gap-3 rounded-md border p-3 text-sm md:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="grid min-w-0 grid-cols-[72px_1fr] gap-3">
+                  <img
+                    src={safeImageUrl(listing.imageUrls[0] || listing.imageUrl)}
+                    alt={listing.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-square w-full rounded-md object-cover"
+                  />
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`/listings/${listing.id}`} className="font-medium text-primary underline">
+                        {listing.title}
+                      </Link>
+                      <Badge variant={listing.status === "ACTIVE" ? "mint" : "warm"}>{listing.status}</Badge>
+                      <Badge variant="outline">{listing.category}</Badge>
+                    </div>
+                    <p className="mt-1 text-muted-foreground">
+                      {money(listing.price.toString())} · {listing.orders.length} order request(s)
+                    </p>
                   </div>
-                  <p className="mt-1 text-muted-foreground">
-                    {money(listing.price.toString())} · {listing.orders.length} order request(s)
-                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Button asChild size="sm" variant="outline">

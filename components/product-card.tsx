@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
 import { Heart, ThumbsDown, ThumbsUp } from "lucide-react";
 import { toggleVote, toggleWishlist } from "@/lib/actions";
+import { safeImageUrl } from "@/lib/image";
 import { money, shortDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ listing }: ProductCardProps) {
-  const image = listing.imageUrls?.[0] || listing.imageUrl || "https://placehold.co/800x600?text=SEU+Market";
+  const image = safeImageUrl(listing.imageUrls?.[0] || listing.imageUrl);
   const likes = listing.votes?.filter((vote) => vote.voteType === "LIKE").length || 0;
   const dislikes = listing.votes?.filter((vote) => vote.voteType === "DISLIKE").length || 0;
   const wishlisted = !!listing.wishlistItems?.length;
@@ -38,7 +38,13 @@ export function ProductCard({ listing }: ProductCardProps) {
     <Card className="h-full overflow-hidden transition hover:border-primary/40">
       <Link href={`/listings/${listing.id}`} className="block">
         <div className="relative aspect-[4/3] bg-muted">
-          <Image src={image} alt={listing.title} fill className="object-cover" />
+          <img
+            src={image}
+            alt={listing.title}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
           {listing.sponsored && (
             <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
               Sponsored

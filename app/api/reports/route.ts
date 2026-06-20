@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { reportService } from "@/lib/services/report-service";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -17,13 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "productId, reporterId, reason, and timestamp are required." }, { status: 400 });
   }
 
-  await db.report.create({
-    data: {
-      listingId: productId,
-      userId: user.id,
-      reason
-    }
-  });
+  await reportService.createListingReport({ listingId: productId, userId: user.id, reason });
 
   return NextResponse.json({
     ok: true,
