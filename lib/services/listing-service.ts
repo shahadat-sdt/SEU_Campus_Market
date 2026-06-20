@@ -121,14 +121,14 @@ export const listingService = {
     if (!isValidListingStatus(status)) throw new DomainError("Invalid listing status.", "INVALID_LISTING_STATUS");
 
     const listing = await listingRepository.findById(listingId);
-    if (!canManageListing(userId, listing)) throw new DomainError("Listing not found.", "LISTING_NOT_FOUND");
+    if (!listing || !canManageListing(userId, listing)) throw new DomainError("Listing not found.", "LISTING_NOT_FOUND");
 
     return listingRepository.setStatus(listingId, status);
   },
 
   async deleteOrArchive(userId: string, listingId: string) {
     const listing = await listingRepository.findForDelete(listingId);
-    if (!canManageListing(userId, listing)) throw new DomainError("Listing not found.", "LISTING_NOT_FOUND");
+    if (!listing || !canManageListing(userId, listing)) throw new DomainError("Listing not found.", "LISTING_NOT_FOUND");
 
     if (shouldArchiveListing(listing.orders.length)) {
       return listingRepository.setStatus(listingId, "HIDDEN");
