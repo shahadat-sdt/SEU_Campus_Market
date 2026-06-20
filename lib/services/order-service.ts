@@ -55,7 +55,9 @@ export const orderService = {
 
   async cancelOrder(input: { userId: string; buyerName: string; orderId: string; reason: string }) {
     const order = await orderRepository.findWithListing(input.orderId);
-    if (!canBuyerCancelOrder(input.userId, order)) throw new DomainError("Order not found.", "ORDER_NOT_FOUND");
+    if (!order || !canBuyerCancelOrder(input.userId, order)) {
+      throw new DomainError("Order not found.", "ORDER_NOT_FOUND");
+    }
 
     await orderRepository.updateStatus(order.id, "CANCELLED", input.reason);
     await dispatchDomainEvent({
@@ -98,7 +100,9 @@ export const orderService = {
     if (!isValidOrderStatus(input.status)) throw new DomainError("Invalid order status.", "INVALID_ORDER_STATUS");
 
     const order = await orderRepository.findWithBuyerAndListing(input.orderId);
-    if (!canSellerManageOrder(input.sellerId, order)) throw new DomainError("Order not found.", "ORDER_NOT_FOUND");
+    if (!order || !canSellerManageOrder(input.sellerId, order)) {
+      throw new DomainError("Order not found.", "ORDER_NOT_FOUND");
+    }
 
     const statusNote = input.status === "CANCELLED" ? input.statusNote || "Cancelled by seller" : input.statusNote || null;
     await orderRepository.updateStatus(order.id, input.status, statusNote);
@@ -122,7 +126,9 @@ export const orderService = {
 
   async markPaymentPaidBySeller(input: { sellerId: string; orderId: string }) {
     const order = await orderRepository.findWithListing(input.orderId);
-    if (!canSellerManageOrder(input.sellerId, order)) throw new DomainError("Order not found.", "ORDER_NOT_FOUND");
+    if (!order || !canSellerManageOrder(input.sellerId, order)) {
+      throw new DomainError("Order not found.", "ORDER_NOT_FOUND");
+    }
 
     await orderRepository.updatePaymentStatus(order.id, "PAID");
     await dispatchDomainEvent({
@@ -150,7 +156,9 @@ export const orderService = {
 
   async createReview(input: { userId: string; orderId: string; rating: number; comment: string }) {
     const order = await orderRepository.findById(input.orderId);
-    if (!canBuyerReviewOrder(input.userId, order)) throw new DomainError("Order not found.", "ORDER_NOT_FOUND");
+    if (!order || !canBuyerReviewOrder(input.userId, order)) {
+      throw new DomainError("Order not found.", "ORDER_NOT_FOUND");
+    }
 
     return db.review.create({
       data: {
