@@ -14,16 +14,6 @@ export const userRepository = {
     return db.user.create({ data });
   },
 
-  setVerificationToken(id: string, token: string, expires: Date) {
-    return db.user.update({
-      where: { id },
-      data: {
-        emailVerificationToken: token,
-        emailVerificationExpires: expires
-      }
-    });
-  },
-
   updateRole(id: string, role: UserRole) {
     return db.user.update({ where: { id }, data: { role } });
   },

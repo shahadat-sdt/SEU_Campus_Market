@@ -48,9 +48,6 @@ model User {
   bio               String?
   phone             String?
   preferredPickup   String?
-  emailVerifiedAt   DateTime?
-  emailVerificationToken String?
-  emailVerificationExpires DateTime?
   role              UserRole           @default(STUDENT)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt

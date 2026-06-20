@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PackageCheck, PackagePlus, ShoppingBag, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { deleteListing, resendVerificationEmail, updateListingStatus, updateOrder } from "@/lib/actions";
+import { deleteListing, updateListingStatus, updateOrder } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { listingStatuses, orderStatuses } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -55,17 +55,6 @@ export default async function SellPage() {
           <Link href="/listings/new"><PackagePlus className="h-4 w-4" /> New listing</Link>
         </Button>
       </div>
-
-      {!user.emailVerifiedAt && (
-        <div className="mb-6 grid gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-          <p className="font-medium">Verify your email to post listings and place orders.</p>
-          <form action={resendVerificationEmail}>
-            <PendingSubmitButton size="sm" variant="outline" pendingChildren="Sending email">
-              Resend verification email
-            </PendingSubmitButton>
-          </form>
-        </div>
-      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat icon={TrendingUp} title="Total sales" value={money(revenue)} />

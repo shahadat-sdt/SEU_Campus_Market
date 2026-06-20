@@ -1,12 +1,10 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { ListingStatus, OrderStatus, UserRole, VoteType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearSession, requireAdmin, requireUser, setSession } from "@/lib/auth";
-import { appUrl, sendTransactionalEmail } from "@/lib/email";
 import { isUniversityEmail, listingCategories, listingStatuses, meetupPoints } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { adminCommands } from "@/lib/commands/admin-commands";
@@ -39,32 +37,6 @@ function parseJsonArray(input: string) {
   }
 }
 
-async function requireVerifiedUser() {
-  const user = await requireUser();
-  if (!user.emailVerifiedAt) redirect("/sell?verify=required");
-  return user;
-}
-
-async function sendVerificationEmail(userId: string, email: string, name: string) {
-  const token = crypto.randomBytes(24).toString("hex");
-  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-  await db.user.update({
-    where: { id: userId },
-    data: {
-      emailVerificationToken: token,
-      emailVerificationExpires: expires
-    }
-  });
-
-  await sendTransactionalEmail({
-    to: email,
-    name,
-    subject: "Verify your SEU Campus Market account",
-    html: `<p>Hi ${name},</p><p>Verify your SEU Campus Market account within 24 hours:</p><p><a href="${appUrl(`/verify-email?token=${token}`)}">Verify email</a></p>`
-  });
-}
-
 function safeReturn(path: string, fallback: string) {
   return path.startsWith("/") && !path.startsWith("//") ? path : fallback;
 }
@@ -89,7 +61,6 @@ export async function register(formData: FormData) {
       data: { name, email, passwordHash }
     });
     userId = user.id;
-    await sendVerificationEmail(user.id, user.email, user.name);
   } catch {
     redirect("/register?error=exists");
   }
@@ -117,7 +88,7 @@ export async function logout() {
 }
 
 export async function createListing(formData: FormData) {
-  const user = await requireVerifiedUser();
+  const user = await requireUser();
   const title = value(formData, "title");
   const description = value(formData, "description");
   const category = value(formData, "category");
@@ -261,7 +232,7 @@ export async function followCategory(formData: FormData) {
 }
 
 export async function placeOrder(formData: FormData) {
-  const user = await requireVerifiedUser();
+  const user = await requireUser();
   const listingId = value(formData, "listingId");
   const quantity = Math.max(1, Number(value(formData, "quantity")) || 1);
   const pickupPoint = value(formData, "pickupPoint");
@@ -472,14 +443,6 @@ export async function updateProfile(formData: FormData) {
   revalidatePath(`/profile/${user.id}`);
   revalidatePath("/profile/edit");
   redirect(`/profile/${user.id}?profile=saved`);
-}
-
-export async function resendVerificationEmail() {
-  const user = await requireUser();
-  if (!user.emailVerifiedAt) {
-    await sendVerificationEmail(user.id, user.email, user.name);
-  }
-  revalidatePath("/sell");
 }
 
 export async function changePassword(formData: FormData) {

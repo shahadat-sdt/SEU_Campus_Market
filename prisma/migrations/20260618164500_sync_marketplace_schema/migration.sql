@@ -46,9 +46,6 @@ CREATE TABLE IF NOT EXISTS "User" (
   "bio" TEXT,
   "phone" TEXT,
   "preferredPickup" TEXT,
-  "emailVerifiedAt" TIMESTAMP(3),
-  "emailVerificationToken" TEXT,
-  "emailVerificationExpires" TIMESTAMP(3),
   "role" "UserRole" NOT NULL DEFAULT 'STUDENT',
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -173,31 +170,7 @@ ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "avatarUrl" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "bio" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "preferredPickup" TEXT;
-ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "emailVerifiedAt" TIMESTAMP(3);
-ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "emailVerificationToken" TEXT;
-ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "emailVerificationExpires" TIMESTAMP(3);
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "role" "UserRole" NOT NULL DEFAULT 'STUDENT';
-
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'User' AND column_name = 'verified'
-  ) THEN
-    UPDATE "User"
-    SET "emailVerifiedAt" = COALESCE("emailVerifiedAt", "updatedAt", CURRENT_TIMESTAMP)
-    WHERE "verified" = true AND "emailVerifiedAt" IS NULL;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'User' AND column_name = 'verificationToken'
-  ) THEN
-    UPDATE "User"
-    SET "emailVerificationToken" = COALESCE("emailVerificationToken", "verificationToken")
-    WHERE "emailVerificationToken" IS NULL;
-  END IF;
-END $$;
 
 ALTER TABLE "Listing" ADD COLUMN IF NOT EXISTS "condition" TEXT NOT NULL DEFAULT 'Good';
 ALTER TABLE "Listing" ADD COLUMN IF NOT EXISTS "quantity" INTEGER NOT NULL DEFAULT 1;

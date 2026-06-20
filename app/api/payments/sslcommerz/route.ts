@@ -8,9 +8,6 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: "Login required." }, { status: 401 });
   }
-  if (!user.emailVerifiedAt) {
-    return NextResponse.json({ error: "Verify your email before checkout." }, { status: 403 });
-  }
 
   const body = await request.json().catch(() => null);
   const orderId = String(body?.orderId || "");

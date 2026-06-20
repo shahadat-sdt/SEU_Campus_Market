@@ -79,7 +79,7 @@ export default async function ProfilePage({ params }: { params: Params }) {
     {
       icon: Mail,
       label: "Email",
-      value: isOwnProfile ? seller.email : seller.emailVerifiedAt ? "Verified university email" : "Not verified yet"
+      value: isOwnProfile ? seller.email : "University email on file"
     },
     {
       icon: Phone,
@@ -113,7 +113,7 @@ export default async function ProfilePage({ params }: { params: Params }) {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="break-words text-3xl font-semibold">{seller.name}</h1>
-                {seller.emailVerifiedAt && <Badge variant="mint"><CheckCircle2 className="h-3.5 w-3.5" /> Verified</Badge>}
+                <Badge variant="mint"><CheckCircle2 className="h-3.5 w-3.5" /> SEU account</Badge>
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 SEU student seller{seller.preferredPickup ? ` · Prefers ${seller.preferredPickup}` : ""}
@@ -175,7 +175,7 @@ export default async function ProfilePage({ params }: { params: Params }) {
             ) : (
               <>
                 <ProfileStat icon={ShoppingBag} label="Completed sales" value={seller._count.sales.toString()} />
-                <ProfileStat icon={CheckCircle2} label="Status" value={seller.emailVerifiedAt ? "Verified" : "New"} />
+                <ProfileStat icon={CheckCircle2} label="Status" value="Active" />
               </>
             )}
           </CardContent>
