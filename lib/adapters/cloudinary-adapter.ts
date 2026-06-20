@@ -6,11 +6,33 @@ import { withRetry, withTimeout } from "@/lib/decorators/fetch-decorators";
 
 const resilientFetch = withRetry(withTimeout(fetch, 10_000), 2);
 
+function cloudinaryConfig() {
+  const explicit = {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET
+  };
+
+  if (explicit.cloudName && explicit.apiKey && explicit.apiSecret) return explicit;
+
+  const cloudinaryUrl = process.env.CLOUDINARY_URL;
+  if (!cloudinaryUrl) return explicit;
+
+  try {
+    const url = new URL(cloudinaryUrl);
+    return {
+      cloudName: url.hostname,
+      apiKey: decodeURIComponent(url.username),
+      apiSecret: decodeURIComponent(url.password)
+    };
+  } catch {
+    return explicit;
+  }
+}
+
 export const cloudinaryAdapter = {
   async uploadImage(file: File) {
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    const { cloudName, apiKey, apiSecret } = cloudinaryConfig();
     if (!cloudName || !apiKey || !apiSecret) {
       throw new DomainError("Cloudinary is not configured.", "CLOUDINARY_NOT_CONFIGURED");
     }

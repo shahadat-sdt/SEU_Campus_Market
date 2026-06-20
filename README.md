@@ -48,6 +48,7 @@ NEXT_PUBLIC_APP_URL="https://your-domain.example"
 CLOUDINARY_CLOUD_NAME="..."
 CLOUDINARY_API_KEY="..."
 CLOUDINARY_API_SECRET="..."
+# Or set CLOUDINARY_URL instead of the three Cloudinary fields above.
 SSLCOMMERZ_STORE_ID="..."
 SSLCOMMERZ_STORE_PASS="..."
 SSLCOMMERZ_BASE_URL="https://sandbox.sslcommerz.com/gwprocess/v4/api.php"
