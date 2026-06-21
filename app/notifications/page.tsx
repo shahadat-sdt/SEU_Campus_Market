@@ -1,18 +1,14 @@
-import { markNotificationsRead, openNotification } from "@/lib/actions";
-import { requireUser } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { shortDate } from "@/lib/utils";
-import { PendingSubmitButton } from "@/components/pending-submit-button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { markNotificationsRead, openNotification } from "@/features/marketplace/actions";
+import { requireUser } from "@/features/auth/server/auth";
+import { marketplaceApi } from "@/features/marketplace/api/marketplace-api";
+import { shortDate } from "@/shared/lib/utils";
+import { PendingSubmitButton } from "@/shared/components/feedback/pending-submit-button";
+import { Badge } from "@/shared/components/ui/badge";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 export default async function NotificationsPage() {
   const user = await requireUser();
-  const notifications = await db.notification.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    take: 50
-  });
+  const notifications = await marketplaceApi.notificationsForUser(user.id);
   const unreadCount = notifications.filter((notification) => !notification.read).length;
 
   return (

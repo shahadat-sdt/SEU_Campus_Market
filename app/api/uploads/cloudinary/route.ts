@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth";
-import { DomainError } from "@/lib/domain/errors";
-import { cloudinaryAdapter } from "@/lib/adapters/cloudinary-adapter";
+import { requireUser } from "@/features/auth/server/auth";
+import { DomainError } from "@/shared/lib/domain/errors";
+import { cloudinaryAdapter } from "@/features/uploads/adapters/cloudinary-adapter";
 
 export async function POST(request: Request) {
   await requireUser();

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { NavigationProgress } from "@/components/navigation-progress";
-import { Nav } from "@/components/nav";
+import { NavigationProgress } from "@/shared/components/layout/navigation-progress";
+import { Nav } from "@/shared/components/layout/nav";
 
 const inter = Inter({ subsets: ["latin"] });
 

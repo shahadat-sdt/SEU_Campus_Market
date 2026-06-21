@@ -1,12 +1,12 @@
-import { changePassword, updateProfile } from "@/lib/actions";
-import { requireUser } from "@/lib/auth";
-import { meetupPoints } from "@/lib/constants";
-import { AuthSubmitButton } from "@/components/auth-submit-button";
-import { PendingSubmitButton } from "@/components/pending-submit-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { changePassword, updateProfile } from "@/features/marketplace/actions";
+import { requireUser } from "@/features/auth/server/auth";
+import { meetupPoints } from "@/shared/lib/constants";
+import { AuthSubmitButton } from "@/features/auth/components/auth-submit-button";
+import { PendingSubmitButton } from "@/shared/components/feedback/pending-submit-button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import { Select } from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

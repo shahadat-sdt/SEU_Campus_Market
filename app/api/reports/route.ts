@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { reportService } from "@/lib/services/report-service";
+import { getCurrentUser } from "@/features/auth/server/auth";
+import { reportService } from "@/features/reports/services/report-service";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();

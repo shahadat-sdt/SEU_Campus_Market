@@ -1,4 +1,4 @@
-import { ListPanelSkeleton, PageHeaderSkeleton, StatGridSkeleton } from "@/components/loading-skeletons";
+import { ListPanelSkeleton, PageHeaderSkeleton, StatGridSkeleton } from "@/shared/components/feedback/loading-skeletons";
 
 export default function Loading() {
   return (

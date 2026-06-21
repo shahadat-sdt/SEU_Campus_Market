@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { DomainError } from "@/lib/domain/errors";
-import { paymentService } from "@/lib/services/payment-service";
+import { getCurrentUser } from "@/features/auth/server/auth";
+import { DomainError } from "@/shared/lib/domain/errors";
+import { paymentService } from "@/features/payments/services/payment-service";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();

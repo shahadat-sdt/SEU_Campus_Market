@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
-import { ListingQueryBuilder } from "@/lib/builders/listing-query-builder";
-import { categories } from "@/lib/constants";
-import { db } from "@/lib/db";
-import { ProductCard } from "@/components/product-card";
-import { PendingSubmitButton } from "@/components/pending-submit-button";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { getCurrentUser } from "@/features/auth/server/auth";
+import { categories } from "@/shared/lib/constants";
+import { marketplaceApi } from "@/features/marketplace/api/marketplace-api";
+import { ProductCard } from "@/features/listings/components/product-card";
+import { PendingSubmitButton } from "@/shared/components/feedback/pending-submit-button";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Select } from "@/shared/components/ui/select";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -22,22 +21,7 @@ export default async function BuyPage({ searchParams }: { searchParams: SearchPa
   const q = first(params.q) || "";
   const category = first(params.category) || "";
   const sort = first(params.sort) || "newest";
-  const listingQuery = new ListingQueryBuilder()
-    .withCategory(category)
-    .withSearch(q)
-    .sortedBy(sort)
-    .build();
-
-  const listings = await db.listing.findMany({
-    where: listingQuery.where,
-    include: {
-      seller: true,
-      votes: { select: { voteType: true } },
-      wishlistItems: user ? { where: { userId: user.id }, select: { id: true } } : false
-    },
-    orderBy: listingQuery.orderBy,
-    take: 48
-  });
+  const listings = await marketplaceApi.listings({ q, category, sort, userId: user?.id });
   const sponsored = listings.find((listing) => listing.sponsored);
   const regularListings = sponsored ? listings.filter((listing) => listing.id !== sponsored.id) : listings;
 
@@ -83,13 +67,13 @@ export default async function BuyPage({ searchParams }: { searchParams: SearchPa
         {sponsored && (
           <div className="mt-5 rounded-lg border bg-card/95 p-4 shadow-sm">
             <p className="mb-3 text-sm font-semibold text-primary">Sponsored</p>
-            <ProductCard listing={sponsored} />
+            <ProductCard listing={sponsored} canInteract={!!user} />
           </div>
         )}
 
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {regularListings.map((listing) => (
-            <ProductCard key={listing.id} listing={listing} />
+            <ProductCard key={listing.id} listing={listing} canInteract={!!user} />
           ))}
         </div>
 

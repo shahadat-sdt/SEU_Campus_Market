@@ -2,20 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Clock3, MapPin, PackagePlus, Search, ShieldCheck, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { getCurrentUser } from "@/features/auth/server/auth";
+import { marketplaceApi } from "@/features/marketplace/api/marketplace-api";
+import { ProductCard } from "@/features/listings/components/product-card";
+import { Button } from "@/shared/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
 
 export default async function Home() {
   const user = await getCurrentUser();
-  const [activeListings, activeSellers] = await Promise.all([
-    db.listing.count({ where: { status: "ACTIVE" } }),
-    db.user.count({ where: { listings: { some: { status: "ACTIVE" } } } })
+  const [[activeListings, activeSellers], latestListings] = await Promise.all([
+    marketplaceApi.homeStats(),
+    marketplaceApi.listings({ sort: "newest", userId: user?.id, limit: 8 })
   ]);
 
   return (
-    <main className="section-shell campus-grid min-h-[calc(100vh-66px)]">
+    <main className="section-shell campus-grid min-h-[calc(100vh-66px)] pb-12">
       <section className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:py-16 lg:grid-cols-[1fr_0.9fr] lg:items-center">
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 rounded-md border bg-card/95 px-3 py-1 text-sm font-medium text-muted-foreground shadow-sm">
@@ -46,6 +47,30 @@ export default async function Home() {
         </div>
 
         <MarketplacePreview activeListings={activeListings} activeSellers={activeSellers} />
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-primary">Latest listings</p>
+            <h2 className="mt-2 text-2xl font-semibold md:text-3xl">Fresh finds from SEU students.</h2>
+          </div>
+          <Button asChild variant="outline">
+            <Link href="/buy">View all <ArrowRight className="h-4 w-4" /></Link>
+          </Button>
+        </div>
+
+        {latestListings.length ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {latestListings.map((listing) => (
+              <ProductCard key={listing.id} listing={listing} canInteract={!!user} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-md border bg-card/95 p-10 text-center text-sm text-muted-foreground shadow-sm">
+            No active listings yet. Be the first student to post an item.
+          </div>
+        )}
       </section>
     </main>
   );

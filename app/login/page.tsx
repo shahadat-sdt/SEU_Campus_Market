@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { login } from "@/lib/actions";
-import { AuthSubmitButton } from "@/components/auth-submit-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { login } from "@/features/marketplace/actions";
+import { AuthSubmitButton } from "@/features/auth/components/auth-submit-button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
             </p>
           )}
           <form action={login} className="space-y-4">
-            <Input name="email" type="email" placeholder="2024000000001@seu.edu.bd" required />
+            <Input name="email" type="email" placeholder="name@seu.edu.bd" required />
             <Input name="password" type="password" placeholder="Password" required />
             <AuthSubmitButton idleLabel="Login" pendingLabel="Logging in..." />
           </form>

@@ -1,6 +1,6 @@
-import { ListPanelSkeleton, PageHeaderSkeleton, StatGridSkeleton } from "@/components/loading-skeletons";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ListPanelSkeleton, PageHeaderSkeleton, StatGridSkeleton } from "@/shared/components/feedback/loading-skeletons";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 export default function Loading() {
   return (

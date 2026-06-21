@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { paymentService } from "@/lib/services/payment-service";
+import { paymentService } from "@/features/payments/services/payment-service";
 
 export async function POST(request: Request) {
   const form = await request.formData();

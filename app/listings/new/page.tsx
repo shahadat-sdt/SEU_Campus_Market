@@ -1,7 +1,7 @@
-import { createListing } from "@/lib/actions";
-import { requireUser } from "@/lib/auth";
-import { ListingForm } from "@/components/listing-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createListing } from "@/features/marketplace/actions";
+import { requireUser } from "@/features/auth/server/auth";
+import { ListingForm } from "@/features/listings/components/listing-form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

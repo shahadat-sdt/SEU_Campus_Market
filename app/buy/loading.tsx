@@ -1,5 +1,5 @@
-import { PageHeaderSkeleton, ProductGridSkeleton } from "@/components/loading-skeletons";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeaderSkeleton, ProductGridSkeleton } from "@/shared/components/feedback/loading-skeletons";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 export default function Loading() {
   return (

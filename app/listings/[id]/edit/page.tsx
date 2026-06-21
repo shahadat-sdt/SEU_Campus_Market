@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import { updateListing } from "@/lib/actions";
-import { requireUser } from "@/lib/auth";
-import { ListingForm } from "@/components/listing-form";
-import { db } from "@/lib/db";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { updateListing } from "@/features/marketplace/actions";
+import { requireUser } from "@/features/auth/server/auth";
+import { ListingForm } from "@/features/listings/components/listing-form";
+import { marketplaceApi } from "@/features/marketplace/api/marketplace-api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -20,7 +20,7 @@ export default async function EditListingPage({
   const paramsValue = await searchParams;
   const error = Array.isArray(paramsValue.error) ? paramsValue.error[0] : paramsValue.error;
 
-  const listing = await db.listing.findUnique({ where: { id } });
+  const listing = await marketplaceApi.listingForEdit(id);
   if (!listing) notFound();
   if (listing.sellerId !== user.id) redirect("/sell");
 
@@ -36,7 +36,7 @@ export default async function EditListingPage({
         <CardContent>
           {error && (
             <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-              Please fill every required field, use an HTTPS photo URL, and keep the price above zero.
+              Please fill every required field, upload at least one photo before the listing goes live, and keep the price above zero.
             </p>
           )}
           <ListingForm
@@ -49,12 +49,13 @@ export default async function EditListingPage({
               condition: listing.condition,
               quantity: listing.quantity,
               price: listing.price.toString(),
-              imageUrls: listing.imageUrls.length ? listing.imageUrls : [listing.imageUrl],
+              imageUrls: (listing.imageUrls.length ? listing.imageUrls : [listing.imageUrl]).filter(Boolean),
               tags: listing.tags,
               negotiable: listing.negotiable,
               campusPickup: listing.campusPickup,
               whatsappContact: listing.whatsappContact,
-              deliveryAvailable: listing.deliveryAvailable
+              deliveryAvailable: listing.deliveryAvailable,
+              status: listing.status
             }}
           />
         </CardContent>

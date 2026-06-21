@@ -1,0 +1,59 @@
+import "server-only";
+
+import crypto from "crypto";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { userRepository } from "@/features/profile/repositories/user-repository";
+
+const cookieName = "seu_market_session";
+
+function secret() {
+  if (!process.env.SESSION_SECRET && process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET is required in production.");
+  }
+  return process.env.SESSION_SECRET || "dev-only-secret-change-me";
+}
+
+function sign(value: string) {
+  return crypto.createHmac("sha256", secret()).update(value).digest("hex");
+}
+
+export async function setSession(userId: string) {
+  const store = await cookies();
+  const value = `${userId}.${sign(userId)}`;
+  store.set(cookieName, value, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 14
+  });
+}
+
+export async function clearSession() {
+  const store = await cookies();
+  store.delete(cookieName);
+}
+
+export async function getCurrentUser() {
+  const store = await cookies();
+  const raw = store.get(cookieName)?.value;
+  if (!raw) return null;
+
+  const [userId, signature] = raw.split(".");
+  if (!userId || signature !== sign(userId)) return null;
+
+  return userRepository.findSessionUser(userId);
+}
+
+export async function requireUser() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  return user;
+}
+
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (user.role !== "ADMIN") redirect("/");
+  return user;
+}
